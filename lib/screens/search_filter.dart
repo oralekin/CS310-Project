@@ -11,11 +11,19 @@ class SearchFilterScreen extends StatefulWidget {
 }
 
 class _SearchFilterScreenState extends State<SearchFilterScreen> {
-  final UniqueKey _formKey = UniqueKey();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text("Filter Events")),
+    appBar: AppBar(
+      title: Text("Filter Events"),
+      actions: [
+        TextButton(
+          onPressed: () => _formKey.currentState?.reset(),
+          child: Text("Clear"),
+        ),
+      ],
+    ),
     body: Form(
       key: _formKey,
       child: Padding(
