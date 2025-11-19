@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:uniconnect/widgets/date_picker.dart';
 
 class SearchFilterScreen extends StatefulWidget {
   const SearchFilterScreen({super.key});
@@ -54,54 +55,11 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
             SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FormField<DateTime>(
-                  builder: (formState) => DatePicker(formState),
-                  // initialValue: DateTime.now(),
-                ),
-                FormField<DateTime>(
-                  builder: (formState) => DatePicker(formState),
-                  // initialValue: DateTime.now(),
-                ),
-              ],
+              children: [FormDatePickerField(), FormDatePickerField()],
             ),
           ],
         ),
       ),
     ),
   );
-}
-
-class DatePicker extends StatelessWidget {
-  final FormFieldState<DateTime> formState;
-
-  Future<void> _selectDate() {
-    return showDatePicker(
-      context: formState.context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    ).then(formState.didChange);
-  }
-
-  String dateFormat(DateTime? d) => d == null
-      ? "DD/MM/YYYY"
-      : "${d.day.toString().padLeft(2)}/${d.month.toString().padLeft(2)}/${d.year.toString().padLeft(4)}";
-
-  const DatePicker(this.formState, {super.key});
-  //   @override
-  //   State<StatefulWidget> createState() => _DatePickerState();
-  // }
-
-  // class _DatePickerState extends State<DatePicker> {
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: GestureDetector(
-        onTap: () => _selectDate(),
-        child: Text(dateFormat(formState.value)),
-      ),
-    );
-  }
 }
