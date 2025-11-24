@@ -8,24 +8,31 @@ String ddmmyyyyFormatter(DateTime d) {
 class DatePicker extends StatelessWidget {
   final FormFieldState<DateTime> formState;
 
-  final String placeholder;
-  final String Function(DateTime) formatter;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+
+  final String? placeholder;
+  final String Function(DateTime)? formatter;
 
   Future<void> _selectDate() {
     return showDatePicker(
       context: formState.context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      firstDate: firstDate ?? DateTime(2020),
+      lastDate: lastDate ?? DateTime(2030),
     ).then(formState.didChange);
   }
 
-  String dateFormat(DateTime? d) => d == null ? "DD/MM/YYYY" : formatter(d);
+  String dateFormat(DateTime? d) => d == null
+      ? (placeholder ?? ddmmyyyyPlaceholder)
+      : (formatter ?? ddmmyyyyFormatter)(d);
 
   const DatePicker({
     super.key,
     required this.formState,
-    this.placeholder = ddmmyyyyPlaceholder,
-    this.formatter = ddmmyyyyFormatter,
+    this.firstDate,
+    this.lastDate,
+    this.placeholder,
+    this.formatter,
   });
 
   @override
@@ -34,12 +41,31 @@ class DatePicker extends StatelessWidget {
       height: 40,
       child: GestureDetector(
         onTap: () => _selectDate(),
-        child: Text(dateFormat(formState.value)),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE6E6E6), // light grey like screenshot
+            borderRadius: BorderRadius.circular(12), // rounded pill-ish
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.calendar_today_outlined, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                dateFormat(formState.value),
+                style: TextStyle(
+                  color: formState.value == null ? Colors.grey : Colors.black87,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
-
 
 // TODO: there might be a better way to do this
 class FormDatePickerField extends FormField<DateTime> {
@@ -54,5 +80,18 @@ class FormDatePickerField extends FormField<DateTime> {
     super.onSaved,
     super.restorationId,
     super.validator,
-  }) : super(builder: (formState) => DatePicker(formState: formState));
+
+    firstDate,
+    lastDate,
+    placeholder,
+    formatter,
+  }) : super(
+         builder: (formState) => DatePicker(
+           formState: formState,
+           firstDate: firstDate,
+           lastDate: lastDate,
+           placeholder: placeholder,
+           formatter: formatter,
+         ),
+       );
 }

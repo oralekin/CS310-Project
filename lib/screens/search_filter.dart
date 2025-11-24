@@ -3,6 +3,9 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:uniconnect/widgets/date_picker.dart';
 
+makeLabel(String s) =>
+    Text(s, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600));
+
 class SearchFilterScreen extends StatefulWidget {
   static const routeName = '/search';
 
@@ -26,63 +29,88 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
         ),
       ],
     ),
-    body: Form(
-      key: _formKey,
+
+    body: SafeArea(
       child: Padding(
-        padding: EdgeInsetsGeometry.symmetric(vertical: 10, horizontal: 10),
-        child: Column(
-          children: [
-            TextFormField(
-              decoration: InputDecoration(
-                filled: true,
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsetsGeometry.symmetric(vertical: 10, horizontal: 10),
+            child: Column(
+              spacing: 4,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(
+                    filled: true,
+                    icon: Icon(Icons.search),
+                    hint: Text(
+                      "Search by name or keyword",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
                 ),
-                fillColor: Color(0xFFE0E0E0),
-                hintStyle: TextStyle(color: Color(0xFFA0A0A0)),
-                icon: Icon(Icons.search),
-                hint: Text(
-                  "Search by name or keyword",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
+                SizedBox(height: 10),
+                makeLabel("University"),
+                DropdownMenuFormField(
+                  hintText: "Select University",
+                  dropdownMenuEntries:
+                      ["Sabanci University", "Leiden University"]
+                          .map(
+                            (uni) => DropdownMenuEntry(label: uni, value: uni),
+                          )
+                          .toList(),
                 ),
-              ),
+                SizedBox(height: 10),
+                makeLabel("Category"),
+                FormField<List<String>>(
+                  builder: (formState) => Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: ["Workshop", "Seminar", "Culture"]
+                        .map(
+                          (name) => FilterChip(
+                            label: Text(name),
+                            onSelected: (s) {
+                              final newList = formState.value!;
+                              if (s) {
+                                newList.add(name);
+                              } else {
+                                newList.remove(name);
+                              }
+                              formState.didChange(newList);
+                            },
+                            selected: formState.value!.contains(name),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  initialValue: [],
+                ),
+                SizedBox(height: 10),
+                makeLabel("Date"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    FormDatePickerField(placeholder: "Start Date"),
+                    FormDatePickerField(placeholder: "End Date"),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // go to events list
+                    },
+                    child: Text("Apply Filters"),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
-            Text("University"),
-            DropdownMenuFormField(dropdownMenuEntries: []),
-            SizedBox(height: 10),
-            Text("Category"),
-            FormField<List<String>>(
-              builder: (formState) => Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: ["some", "categories", "here"]
-                    .map(
-                      (name) => FilterChip(
-                        label: Text(name),
-                        onSelected: (s) {
-                          final newList = formState.value!;
-                          if (s) {
-                            newList.add(name);
-                          } else {
-                            newList.remove(name);
-                          }
-                          formState.didChange(newList);
-                        },
-                        selected: formState.value!.contains(name),
-                      ),
-                    )
-                    .toList(),
-              ),
-              initialValue: [],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [FormDatePickerField(), FormDatePickerField()],
-            ),
-          ],
+          ),
         ),
       ),
     ),
