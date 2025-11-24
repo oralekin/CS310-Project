@@ -81,7 +81,7 @@ class _ChangeProfileScreenState extends State<ChangeProfileScreen> {
 
                     SizedBox(height: 30), // The "gap"
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/invite'),
+                      onPressed: () => Navigator.pop(context),
                       child: Text("Cancel", style: TextStyle(color: Colors.grey, fontSize: 16)),
                     ),
                   ],
@@ -106,4 +106,5 @@ class _ChangeProfileScreenState extends State<ChangeProfileScreen> {
     }
     return null;
   }
+
 }
