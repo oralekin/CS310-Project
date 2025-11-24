@@ -142,7 +142,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, LoginScreen.routeName);
+                        Navigator.pushNamed(context, '/login');
                       },
                       child: const Text(
                         'Back to User Login',
