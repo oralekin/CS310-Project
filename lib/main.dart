@@ -6,8 +6,11 @@ import 'screens/register_screen.dart';
 import 'screens/password_reset_screen.dart';
 import 'screens/reset_confirmation_screen.dart';
 import 'screens/chat_screen.dart';
-
+import 'screens/change_profile_screen.dart';
+import 'screens/camera_preview_screen.dart';
+import 'screens/invite_friend_screen.dart';
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const UniConnectApp());
 }
 
@@ -33,6 +36,9 @@ class UniConnectApp extends StatelessWidget {
         EventDetailsScreen.routeName: (ctx) => const EventDetailsScreen(),
         SearchFilterScreen.routeName: (ctx) => const SearchFilterScreen(),
 
+        '/changeProfile': (ctx) => ChangeProfileScreen(), 
+        '/camera': (ctx) => CameraPreviewScreen(),
+        '/invite': (ctx) => InviteFriendScreen(),
         // ChatScreen special case (uses arguments)
         ChatScreen.routeName: (ctx) => const ChatScreen(),
       },
