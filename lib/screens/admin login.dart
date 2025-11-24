@@ -1,25 +1,6 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/adminLogin',
-      routes: {
-        '/adminLogin': (context) => const AdminLoginScreen(),
-        '/adminHome': (context) => const Scaffold(),
-        '/userLogin': (context) => const Scaffold(),
-      },
-    );
-  }
-}
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -161,7 +142,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, '/userLogin');
+                        Navigator.pushNamed(context, LoginScreen.routeName);
                       },
                       child: const Text(
                         'Back to User Login',
