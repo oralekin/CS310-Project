@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:uniconnect/widgets/date_picker.dart';
 
 class SearchFilterScreen extends StatefulWidget {
+  static const routeName = '/search';
+
   const SearchFilterScreen({super.key});
 
   @override
