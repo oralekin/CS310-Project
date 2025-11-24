@@ -51,7 +51,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F3F3), // Figma’daki açık gri fondan yakın
+      backgroundColor: const Color(
+        0xFFF3F3F3,
+      ), // Figma’daki açık gri fondan yakın
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -66,7 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   'UniConnect',
                   style: TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.w700,
+                    fontFamily: "Inter",
+                    fontVariations: [FontVariation("wght", 700)],
                   ),
                 ),
 
@@ -77,10 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Login',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -164,21 +164,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: _isSubmitting
                               ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
                               : const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -188,10 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _goToPasswordReset,
                         child: const Text(
                           'Forgot Password?',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Colors.black87, fontSize: 14),
                         ),
                       ),
                     ],
