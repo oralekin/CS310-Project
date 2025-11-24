@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-
-
 class AdminLoginScreen extends StatefulWidget {
+  static const routeName = '/adminLogin';   
+
   const AdminLoginScreen({super.key});
 
   @override
