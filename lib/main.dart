@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uniconnect/screens/event_details.dart';
-import 'package:uniconnect/screens/search_filter.dart';
+import 'screens/event_details_screen.dart';
+import 'screens/search_filter_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/password_reset_screen.dart';

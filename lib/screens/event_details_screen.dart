@@ -70,10 +70,17 @@ IconData getPropertyIcon(String iconStr) {
   }
 }
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   static const routeName = "/details";
 
   const EventDetailsScreen({super.key});
+
+  @override
+  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
+}
+
+class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  bool going = false;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +104,8 @@ class EventDetailsScreen extends StatelessWidget {
               ),
               maxExtentValue: 280,
               minExtentValue: 80,
+              going: going,
+              onToggle: () => setState(() => going = !going),
             ),
           ),
           SliverToBoxAdapter(
@@ -181,10 +190,16 @@ class ShrinkingImageHeader extends SliverPersistentHeaderDelegate {
   final double minExtentValue;
   final WidgetBuilder imageBuilder;
 
+  final bool going;
+  final void Function() onToggle;
+
   const ShrinkingImageHeader({
     required this.imageBuilder,
     required this.maxExtentValue,
     required this.minExtentValue,
+
+    required this.going,
+    required this.onToggle,
   });
 
   @override
@@ -213,14 +228,20 @@ class ShrinkingImageHeader extends SliverPersistentHeaderDelegate {
             Positioned(
               right: 16,
               bottom: 16, // put button on corner
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.check),
-                label: const Text("Going"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple[100],
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(110, 42),
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.ease,
+                child: ElevatedButton.icon(
+                  onPressed: onToggle,
+                  icon: Icon(going ? Icons.check : Icons.close),
+                  label: Text(going ? "Going" : "Not Going"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: going
+                        ? Colors.purple[100]
+                        : Colors.red[100],
+                    foregroundColor: Colors.black,
+                    minimumSize: const Size(110, 42),
+                  ),
                 ),
               ),
             ),
