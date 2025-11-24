@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uniconnect/helpers/routes.dart';
+import 'package:uniconnect/screens/chat_screen.dart';
+
 
 void main() {
   runApp(const UniConnect());
