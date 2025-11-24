@@ -12,11 +12,33 @@ class UniConnect extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'UniConnect',
-      // theme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      // ),
+      debugShowCheckedModeBanner: false,
+
+      
       initialRoute: "/",
+
+      // Normal named routes
       routes: routes,
+
+    
+      onGenerateRoute: (settings) {
+        if (settings.name == "/chat") {
+          return MaterialPageRoute(
+            builder: (_) => const ChatScreenWrapper(), 
+            settings: settings,
+          );
+        }
+        return null;
+      },
     );
+  }
+}
+
+class ChatScreenWrapper extends StatelessWidget {
+  const ChatScreenWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ChatScreen();
   }
 }
