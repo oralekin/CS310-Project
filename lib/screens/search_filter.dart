@@ -51,14 +51,29 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
             DropdownMenuFormField(dropdownMenuEntries: []),
             SizedBox(height: 10),
             Text("Category"),
-            Wrap(
-              spacing: 10,
-              children: [
-                Text("abcd"),
-                Text("abcd"),
-                Text("abcd"),
-                Text("abcd"),
-              ],
+            FormField<List<String>>(
+              builder: (formState) => Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: ["some", "categories", "here"]
+                    .map(
+                      (name) => FilterChip(
+                        label: Text(name),
+                        onSelected: (s) {
+                          final newList = formState.value!;
+                          if (s) {
+                            newList.add(name);
+                          } else {
+                            newList.remove(name);
+                          }
+                          formState.didChange(newList);
+                        },
+                        selected: formState.value!.contains(name),
+                      ),
+                    )
+                    .toList(),
+              ),
+              initialValue: [],
             ),
             SizedBox(height: 10),
             Row(
