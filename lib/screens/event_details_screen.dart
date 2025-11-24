@@ -71,6 +71,8 @@ IconData getPropertyIcon(String iconStr) {
 }
 
 class EventDetailsScreen extends StatelessWidget {
+  static const routeName = "/details";
+
   const EventDetailsScreen({super.key});
 
   @override

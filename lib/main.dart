@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uniconnect/screens/event_details.dart';
+import 'package:uniconnect/screens/search_filter.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/password_reset_screen.dart';
@@ -28,6 +30,8 @@ class UniConnectApp extends StatelessWidget {
         PasswordResetScreen.routeName: (ctx) => const PasswordResetScreen(),
         ResetConfirmationScreen.routeName: (ctx) =>
             const ResetConfirmationScreen(),
+        EventDetailsScreen.routeName: (ctx) => const EventDetailsScreen(),
+        SearchFilterScreen.routeName: (ctx) => const SearchFilterScreen(),
 
         // ChatScreen special case (uses arguments)
         ChatScreen.routeName: (ctx) => const ChatScreen(),
