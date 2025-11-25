@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
+import 'admin_login.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -29,13 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
 
-    // TODO: backend login isteği yapılacak yer
     await Future.delayed(const Duration(seconds: 1));
 
     setState(() => _isSubmitting = false);
 
-    // başarılı login varsayalım → chat screen'e git
-    Navigator.of(context).pushReplacementNamed('/chat');
+    Navigator.of(context).pushReplacementNamed(UserHomeScreen.routeName);
   }
 
   void _goToRegister() {
@@ -46,14 +46,16 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.of(context).pushNamed('/password-reset');
   }
 
+  void _goToAdminLogin() {
+    Navigator.pushNamed(context, AdminLoginScreen.routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF3F3F3,
-      ), // Figma’daki açık gri fondan yakın
+      backgroundColor: const Color(0xFFF3F3F3),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -63,7 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 40),
 
-                // UniConnect başlığı
                 const Text(
                   'UniConnect',
                   style: TextStyle(
@@ -75,7 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 48),
 
-                // Login başlığı
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -85,15 +85,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Form
+                // FORM
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      // University Mail Address
+                      // EMAIL
                       TextFormField(
                         controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'University Mail Address',
                           filled: true,
@@ -103,24 +102,22 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderSide: BorderSide.none,
                           ),
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
+                              horizontal: 16, vertical: 14),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Please enter your university email';
                           }
                           if (!value.contains('@')) {
-                            return 'Please enter a valid email address';
+                            return 'Enter a valid email address';
                           }
-                          // İsterseniz burada ".edu" / üniversite domain kontrolü ekleyebilirsiniz
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 12),
 
-                      // Password
+                      // PASSWORD
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
@@ -147,9 +144,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 24),
 
-                      // Login butonu (siyah)
+                      // LOGIN BUTTON
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -164,32 +162,32 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: _isSubmitting
                               ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white),
+                            ),
+                          )
                               : const Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
+
                       const SizedBox(height: 12),
 
-                      // Forgot Password?
                       TextButton(
                         onPressed: _goToPasswordReset,
                         child: const Text(
                           'Forgot Password?',
-                          style: TextStyle(color: Colors.black87, fontSize: 14),
+                          style:
+                          TextStyle(color: Colors.black87, fontSize: 14),
                         ),
                       ),
                     ],
@@ -198,14 +196,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 40),
 
-                // Alt kısım: "Don’t have an account? Register"
+                // REGISTER BUTTON
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Don't have an account? ",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    const Text("Don't have an account? "),
                     GestureDetector(
                       onTap: _goToRegister,
                       child: Text(
@@ -222,6 +217,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
 
                 const SizedBox(height: 24),
+
+                // ⭐ ADMIN LOGIN BUTTON
+                SizedBox(
+                  width: 200,
+                  height: 45,
+                  child: TextButton(
+                    onPressed: _goToAdminLogin,
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color(0xFFE0E0E0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      "Login as Admin",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
               ],
             ),
           ),
