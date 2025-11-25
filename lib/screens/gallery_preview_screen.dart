@@ -4,8 +4,11 @@ import 'package:image_picker/image_picker.dart';
 import '../utils/app_styles.dart';
 
 class GalleryPreviewScreen extends StatefulWidget {
+  static const routeName = "/galleryPreview";
+
   final String imagePath;
-  const GalleryPreviewScreen({required this.imagePath});
+
+  const GalleryPreviewScreen({super.key, required this.imagePath});
 
   @override
   _GalleryPreviewScreenState createState() => _GalleryPreviewScreenState();
@@ -20,10 +23,11 @@ class _GalleryPreviewScreenState extends State<GalleryPreviewScreen> {
     currentImagePath = widget.imagePath;
   }
 
-  //to change the photo if Select Another
+  // Pick another image
   Future<void> _pickAnotherImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
     if (image != null) {
       setState(() {
         currentImagePath = image.path;
@@ -40,15 +44,13 @@ class _GalleryPreviewScreenState extends State<GalleryPreviewScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
-              SizedBox(height: 70),
+              const SizedBox(height: 70),
               Text("Select a Photo", style: AppStyles.pageTitleStyle),
-
-              SizedBox(height: 60),
+              const SizedBox(height: 60),
 
               AspectRatio(
                 aspectRatio: 1,
                 child: Container(
-
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(12),
@@ -63,36 +65,37 @@ class _GalleryPreviewScreenState extends State<GalleryPreviewScreen> {
                 ),
               ),
 
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _pickAnotherImage,
                   style: AppStyles.flatButtonStyle.copyWith(
-                    backgroundColor: WidgetStateProperty.all(Colors.grey[500]),
+                    backgroundColor:
+                        WidgetStateProperty.all(Colors.grey[500]),
                   ),
-                  child: Text("Select Another"),
+                  child: const Text("Select Another"),
                 ),
               ),
 
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    //Pass the image path back to the previous screen
-                    Navigator.pop(context, widget.imagePath);
+                    Navigator.pop(context, currentImagePath);
                   },
                   style: AppStyles.flatButtonStyle.copyWith(
-                    backgroundColor: WidgetStateProperty.all(Colors.grey[400]),
+                    backgroundColor:
+                        WidgetStateProperty.all(Colors.grey[400]),
                   ),
-                  child: Text("Confirm Changes"),
+                  child: const Text("Confirm Changes"),
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),
