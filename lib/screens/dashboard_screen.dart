@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'admin_login.dart';
 import 'create_event.dart';
 import 'home_screen.dart';
-import 'login_screen.dart'; 
+import 'login_screen.dart'; // ⭐ Ekledik: Logout buraya gönderecek
 
 class AdminHomeScreen extends StatelessWidget {
   static const routeName = "/adminHome";
@@ -30,7 +30,7 @@ class AdminHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              
+              // --- MANAGE EVENTS ---
               ActionCard(
                 icon: Icons.event_note_outlined,
                 title: 'Manage Events',
@@ -41,7 +41,7 @@ class AdminHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              
+              // --- MANAGE CLUB ---
               ActionCard(
                 icon: Icons.group_outlined,
                 title: 'Manage Club',
@@ -50,7 +50,7 @@ class AdminHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              
+              // --- VIEW REPORTS ---
               ActionCard(
                 icon: Icons.bar_chart_outlined,
                 title: 'View Reports',
@@ -60,7 +60,7 @@ class AdminHomeScreen extends StatelessWidget {
 
               const Spacer(),
 
-              
+              // USER HOME FEED
               SizedBox(
                 width: double.infinity,
                 height: 45,
@@ -77,7 +77,7 @@ class AdminHomeScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              
+              // LOG OUT → LoginScreen
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -85,8 +85,8 @@ class AdminHomeScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushNamedAndRemoveUntil(
                       context,
-                      LoginScreen.routeName, 
-                          (route) => false,  
+                      LoginScreen.routeName, // ⭐ User Login Screen
+                          (route) => false,  // ⭐ Tüm stack’i sil
                     );
                   },
                   style: ElevatedButton.styleFrom(
