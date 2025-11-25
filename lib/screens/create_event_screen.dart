@@ -1,27 +1,7 @@
 import 'package:flutter/material.dart';
-import 'event store.dart';
+import 'event_store.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/createEvent',
-      routes: {
-        '/createEvent': (context) => const CreateEventScreen(),
-        '/adminHome': (context) => const Placeholder(),
-        '/adminLogin': (context) => const Placeholder(),
-        '/userHome': (context) => const Placeholder(),
-      },
-    );
-  }
-}
+static const routeName = '/createEvent';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
