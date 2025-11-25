@@ -4,10 +4,15 @@ import '../utils/app_styles.dart';
 class InvitedFriend {
   final String email;
   final String status;
+
   InvitedFriend({required this.email, required this.status});
 }
 
 class InviteFriendScreen extends StatefulWidget {
+  static const routeName = "/inviteFriend";
+
+  const InviteFriendScreen({super.key});
+
   @override
   _InviteFriendScreenState createState() => _InviteFriendScreenState();
 }
@@ -30,18 +35,26 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        invitedFriends.insert(0, InvitedFriend(email: emailController.text, status: "Sent"));
+        invitedFriends.insert(
+          0,
+          InvitedFriend(email: emailController.text, status: "Sent"),
+        );
       });
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Success"),
+          title: const Text("Success"),
           content: Text("Invitation sent to ${emailController.text}"),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text("OK"))
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
           ],
         ),
       );
+
       emailController.clear();
     }
   }
@@ -56,24 +69,24 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              //Back Button and Title Layout
+              // Back Button + Title
               Stack(
                 alignment: Alignment.center,
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios, size: 20),
+                      icon: const Icon(Icons.arrow_back_ios, size: 20),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   Text("Invite a Friend", style: AppStyles.pageTitleStyle),
                 ],
               ),
-              SizedBox(height: 40),
 
-              Text("Invite friends to join an event by entering their email."),
-              SizedBox(height: 20),
+              const SizedBox(height: 40),
+              const Text("Invite friends to join an event by entering their email."),
+              const SizedBox(height: 20),
 
               Form(
                 key: _formKey,
@@ -83,27 +96,32 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                       controller: emailController,
                       decoration: InputDecoration(
                         labelText: "Friend's mail address",
-                        border: OutlineInputBorder(), // Standard box input
+                        border: const OutlineInputBorder(),
                         filled: true,
                         fillColor: Colors.grey[50],
                       ),
-                      validator: (value) => (value == null || !value.contains('@')) ? 'Enter valid email' : null,
+                      validator: (value) =>
+                          (value == null || !value.contains('@'))
+                              ? 'Enter valid email'
+                              : null,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+
+              const SizedBox(height: 20),
 
               ElevatedButton(
                 onPressed: _submitForm,
                 style: AppStyles.primaryButtonStyle,
-                child: Text("Send Invitation"),
+                child: const Text("Send Invitation"),
               ),
 
-              SizedBox(height: 30),
-              Divider(),
-              Text("Previously Invited", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 30),
+              const Divider(),
+              const Text("Previously Invited",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
 
               Expanded(
                 child: ListView.builder(
@@ -112,15 +130,17 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                     return Card(
                       elevation: 0,
                       color: Colors.grey[100],
-                      margin: EdgeInsets.symmetric(vertical: 5),
+                      margin: const EdgeInsets.symmetric(vertical: 5),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: NetworkImage('https://ui-avatars.com/api/?name=${invitedFriends[index].email}'),
+                          backgroundImage: NetworkImage(
+                            'https://ui-avatars.com/api/?name=${invitedFriends[index].email}',
+                          ),
                         ),
                         title: Text(invitedFriends[index].email),
                         subtitle: Text(invitedFriends[index].status),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
+                          icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => _removeFriend(index),
                         ),
                       ),
