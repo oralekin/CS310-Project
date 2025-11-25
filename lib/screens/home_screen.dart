@@ -13,7 +13,7 @@ class UserHomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            
+            // HEADER
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -30,7 +30,7 @@ class UserHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  
+                  // SEARCH BAR
                   TextField(
                     decoration: InputDecoration(
                       hintText: 'Search Event',
@@ -64,7 +64,7 @@ class UserHomeScreen extends StatelessWidget {
               ),
             ),
 
-            
+            // CONTENT
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -80,7 +80,7 @@ class UserHomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    
+                    // POPULAR CARDS
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
@@ -103,7 +103,7 @@ class UserHomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    
+                    // ---- GLOBAL EVENTS LİSTESİ ----
                     Column(
                       children: [
                         for (final event in globalEvents)
@@ -121,7 +121,7 @@ class UserHomeScreen extends StatelessWidget {
         ),
       ),
 
-      
+      // BOTTOM NAVIGATION
       bottomNavigationBar: Container(
         height: 60,
         color: Colors.white,
@@ -148,7 +148,7 @@ class UserHomeScreen extends StatelessWidget {
   }
 }
 
-
+// POPULAR EVENT CARD
 class _PopularEventCard extends StatelessWidget {
   const _PopularEventCard();
 
@@ -169,7 +169,7 @@ class _PopularEventCard extends StatelessWidget {
   }
 }
 
-
+// ---- YENİ EVENT KARTLARI ----
 class _CreatedEventCard extends StatelessWidget {
   final EventModel event;
 
@@ -179,7 +179,7 @@ class _CreatedEventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        
+        // CARD
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -222,7 +222,7 @@ class _CreatedEventCard extends StatelessWidget {
           ),
         ),
 
-        
+        // + BUTONU
         Positioned(
           right: 8,
           top: 8,
