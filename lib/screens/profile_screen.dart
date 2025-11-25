@@ -1,109 +1,156 @@
 import 'package:flutter/material.dart';
+import 'edit_profile_screen.dart';
+import 'my_events_screen.dart';
 import 'invite_friend_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
+  static const routeName = "/profile";
+
   const ProfileScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          "My Profile",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+  Widget buildMenu({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color color = Colors.black,
+  }) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.black12)),
       ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: TextButton(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          alignment: Alignment.centerLeft,
+        ),
+        onPressed: onTap,
+        child: Row(
           children: [
-
-            // USER INFO
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundColor: Colors.black87,
-                  child: Text(
-                    "M",
-                    style: TextStyle(color: Colors.white, fontSize: 28),
-                  ),
+            Icon(icon, color: color),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: color,
                 ),
-                SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Mehmet Kaya",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 4),
-                    Text("mehmet@sabanciuniv.edu",
-                        style: TextStyle(color: Colors.grey)),
-                  ],
-                )
-              ],
+              ),
             ),
-
-            SizedBox(height: 35),
-
-            const Text(
-              "Settings",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            SizedBox(height: 10),
-
-            _profileButton(
-              context,
-              icon: Icons.event_note,
-              label: "My Events",
-              route: "/myEvents",
-            ),
-
-            _profileButton(
-              context,
-              icon: Icons.person_add_alt_1,
-              label: "Invite a Friend",
-              route: "/inviteFriend",
-            ),
-
-            _profileButton(
-              context,
-              icon: Icons.logout,
-              label: "Log Out",
-              route: "/adminLogin",
-            ),
+            const Text(">", style: TextStyle(fontSize: 18)),
           ],
         ),
       ),
     );
   }
 
-  Widget _profileButton(BuildContext context,
-      {required IconData icon, required String label, required String route}) {
-    return InkWell(
-      onTap: () => Navigator.pushNamed(context, route),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.grey.shade300),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
-        child: Row(
+        centerTitle: true,
+        title: const Text(
+          "Profile",
+          style: TextStyle(color: Colors.black),
+        ),
+      ),
+
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 22),
-            SizedBox(width: 10),
-            Text(label, style: TextStyle(fontSize: 16)),
-            Spacer(),
-            Icon(Icons.arrow_forward_ios, size: 16)
+            const CircleAvatar(
+              radius: 55,
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.person, size: 60, color: Colors.white),
+            ),
+
+            const SizedBox(height: 15),
+
+            const Text(
+              "Name Surname",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 5),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                "student@sabanciuniv.edu",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+
+            const SizedBox(height: 35),
+
+            // MENU BOX
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 25),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 6,
+                    color: Colors.black.withOpacity(0.07),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  buildMenu(
+                    icon: Icons.edit,
+                    label: "Edit Profile",
+                    onTap: () {
+                      Navigator.pushNamed(context, EditProfileScreen.routeName);
+                    },
+                  ),
+                  buildMenu(
+                    icon: Icons.bookmark,
+                    label: "My Events",
+                    onTap: () {
+                      Navigator.pushNamed(context, MyEventsScreen.routeName);
+                    },
+                  ),
+                  buildMenu(
+                    icon: Icons.person_add,
+                    label: "Invite a Friend",
+                    onTap: () {
+                      Navigator.pushNamed(context, InviteFriendScreen.routeName);
+                    },
+                  ),
+                  buildMenu(
+                    icon: Icons.logout,
+                    color: Colors.red,
+                    label: "Logout",
+                    onTap: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        LoginScreen.routeName,
+                            (route) => false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
