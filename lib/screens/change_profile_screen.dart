@@ -5,6 +5,10 @@ import 'gallery_preview_screen.dart';
 import '../utils/app_styles.dart';
 
 class ChangeProfileScreen extends StatefulWidget {
+  static const routeName = "/changeProfile";
+
+  const ChangeProfileScreen({super.key});
+
   @override
   _ChangeProfileScreenState createState() => _ChangeProfileScreenState();
 }
@@ -12,7 +16,7 @@ class ChangeProfileScreen extends StatefulWidget {
 class _ChangeProfileScreenState extends State<ChangeProfileScreen> {
   File? _profileImage;
 
-  //Helper to update image when returning from other screens
+  // Helper to update image when returning from other screens
   Future<void> _updateProfileImage(Future<dynamic> navigationCall) async {
     final result = await navigationCall;
     if (result != null && result is String) {
@@ -31,13 +35,12 @@ class _ChangeProfileScreenState extends State<ChangeProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: Column(
             children: [
-
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("Change Profile Picture", style: AppStyles.pageTitleStyle),
-                    SizedBox(height: 50),
+                    const SizedBox(height: 50),
                     Container(
                       width: 160,
                       height: 160,
@@ -46,43 +49,48 @@ class _ChangeProfileScreenState extends State<ChangeProfileScreen> {
                         shape: BoxShape.circle,
                         image: _profileImage != null
                             ? DecorationImage(
-                          image: FileImage(_profileImage!),
-                          fit: BoxFit.cover,
-                        )
+                                image: FileImage(_profileImage!),
+                                fit: BoxFit.cover,
+                              )
                             : null,
                       ),
                       alignment: Alignment.center,
                       child: _profileImage == null
-                          ? Text("current photo\nplaceholder", textAlign: TextAlign.center)
+                          ? const Text(
+                              "current photo\nplaceholder",
+                              textAlign: TextAlign.center,
+                            )
                           : null,
                     ),
-                    SizedBox(height: 60),
-
+                    const SizedBox(height: 60),
 
                     ElevatedButton(
                       onPressed: () {
                         _updateProfileImage(_pickFromGallery(context));
                       },
                       style: AppStyles.flatButtonStyle,
-                      child: Text("Select From Gallery"),
+                      child: const Text("Select From Gallery"),
                     ),
 
-                    SizedBox(height: 15),
-
+                    const SizedBox(height: 15),
 
                     ElevatedButton(
                       onPressed: () {
-
-                        _updateProfileImage(Navigator.pushNamed(context, '/camera'));
+                        _updateProfileImage(
+                          Navigator.pushNamed(context, '/camera'),
+                        );
                       },
                       style: AppStyles.flatButtonStyle,
-                      child: Text("Take a Photo"),
+                      child: const Text("Take a Photo"),
                     ),
 
-                    SizedBox(height: 30), // The "gap"
+                    const SizedBox(height: 30),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
                     ),
                   ],
                 ),
@@ -98,13 +106,14 @@ class _ChangeProfileScreenState extends State<ChangeProfileScreen> {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      //Pass to preview screen, wait for confirmation
-      final result = await Navigator.push(context, MaterialPageRoute(
-        builder: (_) => GalleryPreviewScreen(imagePath: image.path),
-      ));
-      return result; //Return confirmed path
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => GalleryPreviewScreen(imagePath: image.path),
+        ),
+      );
+      return result;
     }
     return null;
   }
-
 }
