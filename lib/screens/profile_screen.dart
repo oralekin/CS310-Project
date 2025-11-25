@@ -51,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
 
-
+      // ⭐ APPBAR + BACK BUTTON EKLENDİ
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
