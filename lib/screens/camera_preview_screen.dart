@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import '../utils/app_styles.dart';
 
 class CameraPreviewScreen extends StatefulWidget {
+  static const routeName = "/camera";
+
+  const CameraPreviewScreen({super.key});
+
   @override
   _CameraPreviewScreenState createState() => _CameraPreviewScreenState();
 }
@@ -12,7 +16,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
   CameraController? _controller;
   List<CameraDescription>? cameras;
   int selectedCameraIndex = 0;
-  XFile? capturedImage; //used to freeze the image
+  XFile? capturedImage; // frozen photo
 
   @override
   void initState() {
@@ -22,11 +26,13 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
 
   Future<void> _initCamera() async {
     cameras = await availableCameras();
+
     if (cameras != null && cameras!.isNotEmpty) {
       _controller = CameraController(
-          cameras![selectedCameraIndex],
-          ResolutionPreset.high
+        cameras![selectedCameraIndex],
+        ResolutionPreset.high,
       );
+
       await _controller!.initialize();
       if (mounted) setState(() {});
     }
@@ -34,11 +40,14 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
 
   void _flipCamera() {
     if (cameras == null || cameras!.length < 2) return;
+
     selectedCameraIndex = (selectedCameraIndex == 0) ? 1 : 0;
-    //reset the frozen image if they flip the camera
+
+    // reset frozen image when flipping camera
     setState(() {
       capturedImage = null;
     });
+
     _initCamera();
   }
 
@@ -49,7 +58,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
     try {
       final image = await _controller!.takePicture();
       setState(() {
-        capturedImage = image; //this freezes the image in the box
+        capturedImage = image; // freeze image
       });
     } catch (e) {
       print(e);
@@ -61,7 +70,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
       Navigator.pop(context, capturedImage!.path);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please take a photo first!")),
+        const SnackBar(content: Text("Please take a photo first!")),
       );
     }
   }
@@ -74,9 +83,10 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //Show spinner until camera is ready
     if (_controller == null || !_controller!.value.isInitialized) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
@@ -90,22 +100,23 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("Take a Photo", style: AppStyles.pageTitleStyle),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                  //Camera Flip Circle
+                  // flip camera
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.flip_camera_ios, color: Colors.black),
+                      icon: const Icon(Icons.flip_camera_ios, color: Colors.black),
                       onPressed: _flipCamera,
                     ),
                   ),
 
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
 
+                  // camera preview or frozen image
                   AspectRatio(
                     aspectRatio: 1,
                     child: Container(
@@ -115,14 +126,17 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                       ),
                       clipBehavior: Clip.hardEdge,
                       child: capturedImage != null
-                          ? Image.file(File(capturedImage!.path), fit: BoxFit.cover) //Frozen
-                          : CameraPreview(_controller!), //Live
+                          ? Image.file(
+                              File(capturedImage!.path),
+                              fit: BoxFit.cover,
+                            )
+                          : CameraPreview(_controller!),
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                  //Camera Circle(Capture Button)
+                  // capture button
                   GestureDetector(
                     onTap: _takePicture,
                     child: Container(
@@ -133,12 +147,13 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.grey, width: 2),
                       ),
-                      child: Icon(Icons.camera_alt, size: 30, color: Colors.black),
+                      child: const Icon(Icons.camera_alt, size: 30, color: Colors.black),
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
+                  // save
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -146,12 +161,13 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                       style: AppStyles.primaryButtonStyle.copyWith(
                         backgroundColor: WidgetStateProperty.all(Colors.blue),
                       ),
-                      child: Text("Save Changes"),
+                      child: const Text("Save Changes"),
                     ),
                   ),
 
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
 
+                  // cancel
                   SizedBox(
                     width: 150,
                     height: 40,
@@ -159,10 +175,15 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[400],
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         elevation: 0,
                       ),
-                      child: Text("Cancel", style: TextStyle(color: Colors.white)),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],
