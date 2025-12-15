@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/event_store.dart';
 import 'search_filter_screen.dart';
 import 'event_details_screen.dart';
+import 'profile_screen.dart';
+import 'chat_screen.dart';
+
 
 class UserHomeScreen extends StatefulWidget {
   static const routeName = "/userHome";
@@ -159,23 +162,37 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           color: Colors.white,
           border: Border(top: BorderSide(color: Colors.black12)),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 60),
+        padding: const EdgeInsets.symmetric(horizontal: 40),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // HOME
             IconButton(
-              icon: const Icon(Icons.home_filled),
-              onPressed: () {},
+              icon: const Icon(Icons.home_outlined),
+              onPressed: () {
+                // zaten home'dayız
+              },
             ),
+
+            // PROFILE ✅
+            IconButton(
+              icon: const Icon(Icons.person_outline),
+              onPressed: () {
+                Navigator.pushNamed(context, ProfileScreen.routeName);
+              },
+            ),
+
+            // CHAT
             IconButton(
               icon: const Icon(Icons.chat_bubble_outline),
               onPressed: () {
-                Navigator.pushNamed(context, "/chat");
+                Navigator.pushNamed(context, ChatScreen.routeName);
               },
             ),
           ],
         ),
       ),
+
     );
   }
 }
