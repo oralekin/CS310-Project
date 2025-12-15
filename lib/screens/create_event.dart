@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'event_store.dart';
+import '../models/event_store.dart';
 
 class CreateEventScreen extends StatefulWidget {
   static const routeName = "/createEvent";
@@ -20,6 +20,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String _dateText = 'Pick Date';
   String _timeText = 'Pick Time';
 
+  DateTime? _selectedDate; // ✅ ARKA PLANDA DateTime TUTULUR
+
   final List<String> _categories = [
     'Workshop',
     'Social',
@@ -31,12 +33,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      if (_selectedDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please pick a date')),
+        );
+        return;
+      }
+
       globalEvents.add(
         EventModel(
           title: _title,
           description: _description,
           category: _selectedCategory ?? '',
-          date: _dateText,
+          date: _selectedDate!, // ✅ ARTIK DateTime
           time: _timeText,
           location: _location,
         ),
@@ -50,7 +59,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // close dialog
+                Navigator.of(context).pop();
                 Navigator.pushNamed(context, '/adminHome');
               },
               child: const Text('OK'),
@@ -91,7 +100,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // TITLE
                 const Text('Event Title',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 6),
@@ -113,7 +121,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                 const SizedBox(height: 16),
 
-                // DESCRIPTION
                 const Text('Description',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 6),
@@ -136,7 +143,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                 const SizedBox(height: 16),
 
-                // CATEGORY
                 const Text('Category',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 6),
@@ -167,7 +173,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                 Row(
                   children: [
-                    // DATE BUTTON
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
@@ -185,6 +190,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                           if (picked != null) {
                             setState(() {
+                              _selectedDate = picked;
                               _dateText =
                               "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
                             });
@@ -194,7 +200,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(_dateText,
-                                style: const TextStyle(color: Colors.black87)),
+                                style:
+                                const TextStyle(color: Colors.black87)),
                             const SizedBox(width: 6),
                             const Icon(Icons.calendar_today_outlined,
                                 size: 18, color: Colors.black87),
@@ -205,7 +212,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                     const SizedBox(width: 12),
 
-                    // TIME BUTTON
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
@@ -228,7 +234,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(_timeText,
-                                style: const TextStyle(color: Colors.black87)),
+                                style:
+                                const TextStyle(color: Colors.black87)),
                             const SizedBox(width: 6),
                             const Icon(Icons.access_time,
                                 size: 18, color: Colors.black87),
@@ -241,7 +248,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                 const SizedBox(height: 16),
 
-                // LOCATION
                 const Text('Location',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 6),
@@ -263,7 +269,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                 const SizedBox(height: 24),
 
-                // SAVE BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 52,

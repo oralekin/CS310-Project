@@ -14,142 +14,195 @@ class InviteFriendScreen extends StatefulWidget {
   const InviteFriendScreen({super.key});
 
   @override
-  _InviteFriendScreenState createState() => _InviteFriendScreenState();
+  State<InviteFriendScreen> createState() => _InviteFriendScreenState();
 }
 
 class _InviteFriendScreenState extends State<InviteFriendScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
-  List<InvitedFriend> invitedFriends = [
+  final List<InvitedFriend> _invitedFriends = [
     InvitedFriend(email: "ali@sabanciuniv.edu", status: "Pending"),
     InvitedFriend(email: "saima@sabanciuniv.edu", status: "Accepted"),
   ];
 
-  void _removeFriend(int index) {
-    setState(() {
-      invitedFriends.removeAt(index);
-    });
-  }
-
-  void _submitForm() {
+  void _sendInvite() {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        invitedFriends.insert(
+        _invitedFriends.insert(
           0,
-          InvitedFriend(email: emailController.text, status: "Sent"),
+          InvitedFriend(
+            email: _emailController.text.trim(),
+            status: "Sent",
+          ),
         );
       });
 
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Success"),
-          content: Text("Invitation sent to ${emailController.text}"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Invitation sent to ${_emailController.text}"),
+          duration: const Duration(seconds: 2),
         ),
       );
 
-      emailController.clear();
+      _emailController.clear();
     }
+  }
+
+  void _removeInvite(int index) {
+    setState(() {
+      _invitedFriends.removeAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Back Button + Title
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, size: 20),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+
+      /// 🔹 APP BAR
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        centerTitle: true,
+        title: Text(
+          "Invite a Friend",
+          style: AppStyles.pageTitleStyle.copyWith(color: Colors.black),
+        ),
+      ),
+
+      /// 🔹 BODY
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Invite your friends to join UniConnect by entering their email address.",
+              style: TextStyle(color: Colors.black54),
+            ),
+
+            const SizedBox(height: 24),
+
+            /// EMAIL FORM
+            Form(
+              key: _formKey,
+              child: TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: "Friend’s email address",
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Text("Invite a Friend", style: AppStyles.pageTitleStyle),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-              const Text("Invite friends to join an event by entering their email."),
-              const SizedBox(height: 20),
-
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: emailController,
-                      decoration: InputDecoration(
-                        labelText: "Friend's mail address",
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.grey[50],
-                      ),
-                      validator: (value) =>
-                          (value == null || !value.contains('@'))
-                              ? 'Enter valid email'
-                              : null,
-                    ),
-                    const SizedBox(height: 10),
-                  ],
                 ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Email cannot be empty";
+                  }
+                  if (!value.contains('@')) {
+                    return "Enter a valid email";
+                  }
+                  return null;
+                },
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-              ElevatedButton(
-                onPressed: _submitForm,
+            /// SEND BUTTON
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _sendInvite,
                 style: AppStyles.primaryButtonStyle,
                 child: const Text("Send Invitation"),
               ),
+            ),
 
-              const SizedBox(height: 30),
-              const Divider(),
-              const Text("Previously Invited",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 32),
+            const Divider(),
 
-              Expanded(
-                child: ListView.builder(
-                  itemCount: invitedFriends.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 0,
+            const SizedBox(height: 12),
+            const Text(
+              "Previously Invited",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// INVITED LIST
+            Expanded(
+              child: _invitedFriends.isEmpty
+                  ? Center(
+                child: Text(
+                  "No invitations yet",
+                  style: TextStyle(color: Colors.grey.shade500),
+                ),
+              )
+                  : ListView.builder(
+                itemCount: _invitedFriends.length,
+                itemBuilder: (context, index) {
+                  final friend = _invitedFriends[index];
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
                       color: Colors.grey[100],
-                      margin: const EdgeInsets.symmetric(vertical: 5),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            'https://ui-avatars.com/api/?name=${invitedFriends[index].email}',
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.blueGrey,
+                          child: Text(
+                            friend.email[0].toUpperCase(),
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
-                        title: Text(invitedFriends[index].email),
-                        subtitle: Text(invitedFriends[index].status),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _removeFriend(index),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                friend.email,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                friend.status,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: friend.status == "Accepted"
+                                      ? Colors.green
+                                      : Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline,
+                              color: Colors.red),
+                          onPressed: () => _removeInvite(index),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -30,33 +30,33 @@ class _ChatScreenState extends State<ChatScreen> {
       "isMe": true,
     },
     {
-      "text": "Nice! Don’t forget to bring your laptop, there’ll be a coding part 💻",
-      "isMe": false,
-    },
-    {
-      "text": "Got it! Is there any group project or just solo work?",
-      "isMe": true,
-    },
-    {
-      "text": "Mostly solo, but you can team up if you want.",
+      "text": "Nice! Don’t forget to bring your laptop 💻",
       "isMe": false,
     },
   ];
 
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
     setState(() {
-      _messages.add({"text": text, "isMe": true});
+      _messages.insert(0, {"text": text, "isMe": true});
     });
 
     _controller.clear();
   }
 
-  Widget _buildMessageBubble(String text, bool isMe) {
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildBubble(String text, bool isMe) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -68,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 14, height: 1.4),
+          style: const TextStyle(fontSize: 14),
         ),
       ),
     );
@@ -76,69 +76,42 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments
-    as ChatScreenArguments?;
+    final args =
+    ModalRoute.of(context)?.settings.arguments as ChatScreenArguments?;
 
-    final categoryLabel = args?.categoryLabel ?? 'Event Chat';
-    final chatTitle = args?.chatTitle ?? 'Chat';
+    final categoryLabel = args?.categoryLabel ?? "Event Chat";
+    final chatTitle = args?.chatTitle ?? "Chat";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3F3F3),
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 8),
-
+            // 🔹 HEADER
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: const Icon(Icons.arrow_back, size: 22),
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            categoryLabel,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        Text(
+                          categoryLabel,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            chatTitle,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        const SizedBox(height: 4),
+                        Text(
+                          chatTitle,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
                           ),
                         ),
                       ],
@@ -148,52 +121,41 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
-
+            // 🔹 MESSAGES
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
+                reverse: true,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  return _buildMessageBubble(msg["text"], msg["isMe"]);
+                itemBuilder: (_, i) {
+                  final m = _messages[i];
+                  return _buildBubble(m["text"], m["isMe"]);
                 },
               ),
             ),
 
+            // 🔹 INPUT
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.all(12),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                border: Border(
-                  top: BorderSide(color: Colors.black12, width: 0.5),
-                ),
+                border: Border(top: BorderSide(color: Colors.black12)),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F3F3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: TextField(
-                        controller: _controller,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Type a message...",
-                        ),
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: "Type a message...",
+                        border: InputBorder.none,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _sendMessage,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey.shade700,
-                      child: const Icon(Icons.arrow_forward, color: Colors.white),
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _sendMessage,
                   ),
                 ],
               ),

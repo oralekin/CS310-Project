@@ -9,26 +9,23 @@ class ProfileScreen extends StatelessWidget {
 
   const ProfileScreen({super.key});
 
-  Widget buildMenu({
+  Widget _buildMenuItem({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
     Color color = Colors.black,
   }) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black12)),
-      ),
-      child: TextButton(
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-          alignment: Alignment.centerLeft,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.black12)),
         ),
-        onPressed: onTap,
         child: Row(
           children: [
             Icon(icon, color: color),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
@@ -39,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const Text(">", style: TextStyle(fontSize: 18)),
+            const Icon(Icons.chevron_right, color: Colors.black45),
           ],
         ),
       ),
@@ -51,7 +48,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
 
-      // ⭐ APPBAR + BACK BUTTON EKLENDİ
+      /// 🔹 APP BAR
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -62,29 +59,41 @@ class ProfileScreen extends StatelessWidget {
         centerTitle: true,
         title: const Text(
           "Profile",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
 
-      body: Center(
+      /// 🔹 BODY
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 30),
+
+            /// PROFILE AVATAR
             const CircleAvatar(
               radius: 55,
               backgroundColor: Colors.grey,
-              child: Icon(Icons.person, size: 60, color: Colors.white),
+              child: Icon(
+                Icons.person,
+                size: 60,
+                color: Colors.white,
+              ),
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 14),
 
+            /// NAME
             const Text(
               "Name Surname",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
-            const SizedBox(height: 5),
+            const SizedBox(height: 6),
 
+            /// EMAIL BADGE
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
@@ -93,64 +102,75 @@ class ProfileScreen extends StatelessWidget {
               ),
               child: const Text(
                 "student@sabanciuniv.edu",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 13),
               ),
             ),
 
             const SizedBox(height: 35),
 
-            // MENU BOX
+            /// MENU CARD
             Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 25),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    blurRadius: 6,
-                    color: Colors.black.withOpacity(0.07),
+                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.06),
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Column(
                 children: [
-                  buildMenu(
+                  _buildMenuItem(
                     icon: Icons.edit,
                     label: "Edit Profile",
                     onTap: () {
-                      Navigator.pushNamed(context, EditProfileScreen.routeName);
+                      Navigator.pushNamed(
+                        context,
+                        EditProfileScreen.routeName,
+                      );
                     },
                   ),
-                  buildMenu(
-                    icon: Icons.bookmark,
+                  _buildMenuItem(
+                    icon: Icons.bookmark_border,
                     label: "My Events",
                     onTap: () {
-                      Navigator.pushNamed(context, MyEventsScreen.routeName);
+                      Navigator.pushNamed(
+                        context,
+                        MyEventsScreen.routeName,
+                      );
                     },
                   ),
-                  buildMenu(
-                    icon: Icons.person_add,
+                  _buildMenuItem(
+                    icon: Icons.person_add_alt_1,
                     label: "Invite a Friend",
                     onTap: () {
-                      Navigator.pushNamed(context, InviteFriendScreen.routeName);
+                      Navigator.pushNamed(
+                        context,
+                        InviteFriendScreen.routeName,
+                      );
                     },
                   ),
-                  buildMenu(
+                  _buildMenuItem(
                     icon: Icons.logout,
-                    color: Colors.red,
                     label: "Logout",
+                    color: Colors.red,
                     onTap: () {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         LoginScreen.routeName,
-                            (route) => false,
+                            (_) => false,
                       );
                     },
                   ),
                 ],
               ),
             ),
+
+            const SizedBox(height: 40),
           ],
         ),
       ),

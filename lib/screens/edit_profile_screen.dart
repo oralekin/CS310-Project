@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import '../utils/app_styles.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  //Named route for main.dart
   static const routeName = '/editProfile';
 
+  const EditProfileScreen({super.key});
+
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   File? _profileImage;
-
 
   final _nameController = TextEditingController();
   final _uniController = TextEditingController();
@@ -27,7 +27,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _navigateToChangeProfile() async {
-    //Navigate and wait for the result (the image path)
     final result = await Navigator.pushNamed(context, '/changeProfile');
 
     if (result != null && result is String) {
@@ -41,113 +40,134 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
+      /// 🔹 APP BAR (GERİ OK + BAŞLIK)
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        centerTitle: true,
+        title: Text(
+          "Edit Profile",
+          style: AppStyles.pageTitleStyle.copyWith(color: Colors.black),
+        ),
+      ),
+
+      /// 🔹 BODY
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                Text("Edit Profile", style: AppStyles.pageTitleStyle),
-
-                SizedBox(height: 30),
-
-                GestureDetector(
-                  onTap: _navigateToChangeProfile,
-                  child: Stack(
-                    children: [
-
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          shape: BoxShape.circle,
-                          image: _profileImage != null
-                              ? DecorationImage(
-                            image: FileImage(_profileImage!),
-                            fit: BoxFit.cover,
-                          )
-                              : null,
-                        ),
-                        alignment: Alignment.center,
-                        child: _profileImage == null
-                            ? Icon(Icons.person, size: 60, color: Colors.grey[600])
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          child: Column(
+            children: [
+              /// PROFILE IMAGE
+              GestureDetector(
+                onTap: _navigateToChangeProfile,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        shape: BoxShape.circle,
+                        image: _profileImage != null
+                            ? DecorationImage(
+                          image: FileImage(_profileImage!),
+                          fit: BoxFit.cover,
+                        )
                             : null,
                       ),
+                      alignment: Alignment.center,
+                      child: _profileImage == null
+                          ? Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.grey[600],
+                      )
+                          : null,
+                    ),
 
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppStyles.primaryColor, // Uses your Green/Theme color
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: Icon(Icons.edit, color: Colors.white, size: 20),
+                    /// EDIT ICON
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppStyles.primaryColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                          size: 20,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 40),
-
-                _buildTextField("Full Name", _nameController),
-                SizedBox(height: 15),
-                _buildTextField("University", _uniController),
-                SizedBox(height: 15),
-
-
-                TextField(
-                  controller: _bioController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-
-                    hintText: "Tell others about your interests and what clubs you love!",
-                    hintMaxLines: 3,
-
-                    alignLabelWithHint: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey),
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                  ),
+                  ],
                 ),
+              ),
 
-                SizedBox(height: 40),
+              const SizedBox(height: 40),
 
+              /// FULL NAME
+              _buildTextField("Full Name", _nameController),
+              const SizedBox(height: 15),
 
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
+              /// UNIVERSITY
+              _buildTextField("University", _uniController),
+              const SizedBox(height: 15),
 
-                      Navigator.pop(context);
-                    },
-                    style: AppStyles.primaryButtonStyle.copyWith(
-                      backgroundColor: WidgetStateProperty.all(Colors.blue),
-                    ),
-                    child: Text("Save Changes"),
+              /// BIO
+              TextField(
+                controller: _bioController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText:
+                  "Tell others about your interests and what clubs you love!",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  contentPadding: const EdgeInsets.all(14),
                 ),
+              ),
 
-                SizedBox(height: 20),
-              ],
-            ),
+              const SizedBox(height: 40),
+
+              /// SAVE BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 🔜 Firebase gelince burada save işlemi olacak
+                    Navigator.pop(context);
+                  },
+                  style: AppStyles.primaryButtonStyle.copyWith(
+                    backgroundColor:
+                    WidgetStateProperty.all(Colors.blue),
+                  ),
+                  child: const Text("Save Changes"),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Helper for cleaner code
-  Widget _buildTextField(String label, TextEditingController controller) {
+  /// 🔹 TEXT FIELD HELPER
+  Widget _buildTextField(
+      String label,
+      TextEditingController controller,
+      ) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -157,7 +177,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         filled: true,
         fillColor: Colors.grey[50],
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
       ),
     );
   }

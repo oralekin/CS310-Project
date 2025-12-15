@@ -1,78 +1,107 @@
 import 'package:flutter/material.dart';
-import 'event_store.dart';
+import '../models/event_store.dart';
+import 'search_filter_screen.dart';
+import 'event_details_screen.dart';
 
-class UserHomeScreen extends StatelessWidget {
+class UserHomeScreen extends StatefulWidget {
   static const routeName = "/userHome";
 
   const UserHomeScreen({super.key});
 
   @override
+  State<UserHomeScreen> createState() => _UserHomeScreenState();
+}
+
+class _UserHomeScreenState extends State<UserHomeScreen> {
+  String? _query;
+  List<String> _categories = [];
+
+  List<EventModel> get _filteredEvents {
+    return globalEvents.where((e) {
+      if (_query != null && _query!.isNotEmpty) {
+        if (!e.title.toLowerCase().contains(_query!.toLowerCase())) {
+          return false;
+        }
+      }
+
+      if (_categories.isNotEmpty && !_categories.contains(e.category)) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
+  Future<void> _openFilters() async {
+    final result = await Navigator.pushNamed(
+      context,
+      SearchFilterScreen.routeName,
+    );
+
+    if (result != null && result is Map) {
+      setState(() {
+        _query = result["query"];
+        _categories = List<String>.from(result["categories"] ?? []);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+      backgroundColor: Colors.white,
+
+      // ───────── HEADER ─────────
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: const Color(0xFFE0E0E0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              color: const Color(0xFFE5E5E5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'UniConnect',
+                    "UniConnect",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 10),
-
-                  // SEARCH BAR
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search Event',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 0,
+                  GestureDetector(
+                    onTap: _openFilters,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/profile');
-                      },
-                      icon: const Icon(Icons.person_outline),
-                      label: const Text("My Profile"),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.search, size: 18),
+                          SizedBox(width: 6),
+                          Text("Search Event"),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // CONTENT
+            // ───────── CONTENT ─────────
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // POPULAR EVENTS
                     const Text(
-                      'Popular Events',
+                      "Popular Events",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -80,22 +109,24 @@ class UserHomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // POPULAR CARDS
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        _PopularEventCard(),
-                        _PopularEventCard(),
-                        _PopularEventCard(),
-                      ],
+                    SizedBox(
+                      height: 130,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (_, __) => const _PopularEventCard(),
+                        separatorBuilder: (_, __) =>
+                        const SizedBox(width: 12),
+                        itemCount: 3,
+                      ),
                     ),
 
+                    const SizedBox(height: 20),
+                    const Divider(),
                     const SizedBox(height: 16),
-                    const Divider(thickness: 1),
-                    const SizedBox(height: 12),
 
+                    // NEW EVENTS
                     const Text(
-                      'New Events',
+                      "New Events",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -103,15 +134,15 @@ class UserHomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // ---- GLOBAL EVENTS LİSTESİ ----
                     Column(
-                      children: [
-                        for (final event in globalEvents)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _CreatedEventCard(event: event),
-                          )
-                      ],
+                      children: _filteredEvents
+                          .map(
+                            (event) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _NewEventCard(event: event),
+                        ),
+                      )
+                          .toList(),
                     ),
                   ],
                 ),
@@ -121,25 +152,26 @@ class UserHomeScreen extends StatelessWidget {
         ),
       ),
 
-      // BOTTOM NAVIGATION
+      // ───────── BOTTOM NAV ─────────
       bottomNavigationBar: Container(
-        height: 60,
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 40),
+        height: 64,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Colors.black12)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 60),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, UserHomeScreen.routeName);
-              },
               icon: const Icon(Icons.home_filled),
+              onPressed: () {},
             ),
             IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/chat');
-              },
               icon: const Icon(Icons.chat_bubble_outline),
+              onPressed: () {
+                Navigator.pushNamed(context, "/chat");
+              },
             ),
           ],
         ),
@@ -148,108 +180,91 @@ class UserHomeScreen extends StatelessWidget {
   }
 }
 
-// POPULAR EVENT CARD
+// ───────── POPULAR CARD (mock) ─────────
 class _PopularEventCard extends StatelessWidget {
   const _PopularEventCard();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
-      height: 90,
+      width: 120,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.black12),
       ),
-      child: const Center(
-        child: Icon(Icons.event, size: 30),
+      child: const Column(
+        children: [
+          Icon(Icons.image_outlined, size: 48),
+          SizedBox(height: 8),
+          Text("Event Title"),
+        ],
       ),
     );
   }
 }
 
-// ---- YENİ EVENT KARTLARI ----
-class _CreatedEventCard extends StatelessWidget {
+// ───────── NEW EVENT CARD → DETAILS ─────────
+class _NewEventCard extends StatelessWidget {
   final EventModel event;
 
-  const _CreatedEventCard({required this.event});
+  const _NewEventCard({required this.event});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // CARD
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade300),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventDetailsScreen(event: event),
           ),
-          child: Row(
-            children: [
-              const Icon(Icons.event, size: 38, color: Colors.black54),
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      event.description,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "${event.location} • ${event.date} ${event.time}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2F2F2),
+          borderRadius: BorderRadius.circular(12),
         ),
-
-        // + BUTONU
-        Positioned(
-          right: 8,
-          top: 8,
-          child: GestureDetector(
-            onTap: () {
-              if (!myEvents.contains(event)) {
-                myEvents.add(event);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Event added to My Events"),
-                    duration: Duration(seconds: 1),
+        child: Row(
+          children: [
+            const Icon(Icons.image_outlined, size: 50),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.title,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                );
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Text(
+                    "${event.time} • ${event.location}",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    event.description,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 20),
             ),
-          ),
-        )
-      ],
+          ],
+        ),
+      ),
     );
   }
 }

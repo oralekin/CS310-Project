@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// MODELS
+import 'models/event_store.dart';
+
 // USER SCREENS
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -66,13 +69,19 @@ class UniConnectApp extends StatelessWidget {
 
         // CHAT
         ChatScreen.routeName: (ctx) => const ChatScreen(),
-
-        // EVENT DETAILS
-        EventDetailsScreen.routeName: (ctx) => const EventDetailsScreen(),
       },
 
-      // SPECIAL: GalleryPreviewScreen (arguments ile çalışır)
+      // 🔑 ARGUMENT GEREKTİREN SAYFALAR
       onGenerateRoute: (settings) {
+        // EVENT DETAILS (EventModel gönderiyoruz)
+        if (settings.name == EventDetailsScreen.routeName) {
+          final event = settings.arguments as EventModel;
+          return MaterialPageRoute(
+            builder: (_) => EventDetailsScreen(event: event),
+          );
+        }
+
+        // GALLERY PREVIEW (String path gönderiyoruz)
         if (settings.name == GalleryPreviewScreen.routeName) {
           final imagePath = settings.arguments as String;
           return MaterialPageRoute(
