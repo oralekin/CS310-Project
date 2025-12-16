@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+// SCREENS
 import 'login_screen.dart';
+import 'home_screen.dart';
+
+// PROVIDER
+import '../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   static const routeName = "/splash";
@@ -16,7 +23,19 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+
+      if (auth.isLoggedIn) {
+        Navigator.pushReplacementNamed(
+          context,
+          UserHomeScreen.routeName,
+        );
+      } else {
+        Navigator.pushReplacementNamed(
+          context,
+          LoginScreen.routeName,
+        );
+      }
     });
   }
 
@@ -47,7 +66,10 @@ class _SplashScreenState extends State<SplashScreen> {
               backgroundColor: Colors.grey,
             ),
             SizedBox(height: 20),
-            Text("Loading...", style: TextStyle(color: Colors.grey)),
+            Text(
+              "Loading...",
+              style: TextStyle(color: Colors.grey),
+            ),
             Spacer(),
           ],
         ),

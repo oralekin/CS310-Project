@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:provider/provider.dart';
 
 // MODELS
 import 'models/event_store.dart';
+
+// PROVIDERS
+import 'providers/auth_provider.dart';
 
 // USER SCREENS
 import 'screens/splash_screen.dart';
@@ -31,8 +37,28 @@ import 'screens/chat_screen.dart';
 // EVENT DETAILS
 import 'screens/event_details_screen.dart';
 
-void main() {
-  runApp(const UniConnectApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  /// 🔥 FIREBASE INIT (FlutterFire CLI uyumlu)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const UniConnectRoot());
+}
+
+/// 🔑 ROOT: Provider burada, HER ŞEYİN ÜSTÜNDE
+class UniConnectRoot extends StatelessWidget {
+  const UniConnectRoot({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<AuthProvider>(
+      create: (_) => AuthProvider(),
+      child: const UniConnectApp(),
+    );
+  }
 }
 
 class UniConnectApp extends StatelessWidget {
@@ -50,22 +76,30 @@ class UniConnectApp extends StatelessWidget {
         SplashScreen.routeName: (ctx) => const SplashScreen(),
         LoginScreen.routeName: (ctx) => const LoginScreen(),
         RegisterScreen.routeName: (ctx) => const RegisterScreen(),
-        PasswordResetScreen.routeName: (ctx) => const PasswordResetScreen(),
+        PasswordResetScreen.routeName: (ctx) =>
+        const PasswordResetScreen(),
         UserHomeScreen.routeName: (ctx) => const UserHomeScreen(),
         ProfileScreen.routeName: (ctx) => const ProfileScreen(),
         EditProfileScreen.routeName: (ctx) => EditProfileScreen(),
         MyEventsScreen.routeName: (ctx) => const MyEventsScreen(),
-        InviteFriendScreen.routeName: (ctx) => const InviteFriendScreen(),
-        SearchFilterScreen.routeName: (ctx) => const SearchFilterScreen(),
+        InviteFriendScreen.routeName: (ctx) =>
+        const InviteFriendScreen(),
+        SearchFilterScreen.routeName: (ctx) =>
+        const SearchFilterScreen(),
 
         // PROFILE → Photo change
-        ChangeProfileScreen.routeName: (ctx) => const ChangeProfileScreen(),
-        CameraPreviewScreen.routeName: (ctx) => const CameraPreviewScreen(),
+        ChangeProfileScreen.routeName: (ctx) =>
+        const ChangeProfileScreen(),
+        CameraPreviewScreen.routeName: (ctx) =>
+        const CameraPreviewScreen(),
 
         // ADMIN
-        AdminLoginScreen.routeName: (ctx) => const AdminLoginScreen(),
-        AdminHomeScreen.routeName: (ctx) => const AdminHomeScreen(),
-        CreateEventScreen.routeName: (ctx) => const CreateEventScreen(),
+        AdminLoginScreen.routeName: (ctx) =>
+        const AdminLoginScreen(),
+        AdminHomeScreen.routeName: (ctx) =>
+        const AdminHomeScreen(),
+        CreateEventScreen.routeName: (ctx) =>
+        const CreateEventScreen(),
 
         // CHAT
         ChatScreen.routeName: (ctx) => const ChatScreen(),
@@ -85,7 +119,8 @@ class UniConnectApp extends StatelessWidget {
         if (settings.name == GalleryPreviewScreen.routeName) {
           final imagePath = settings.arguments as String;
           return MaterialPageRoute(
-            builder: (_) => GalleryPreviewScreen(imagePath: imagePath),
+            builder: (_) =>
+                GalleryPreviewScreen(imagePath: imagePath),
           );
         }
 
