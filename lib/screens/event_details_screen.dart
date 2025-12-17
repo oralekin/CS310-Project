@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/event_store.dart';
+import '../providers/auth_provider.dart';
+import '../screens/chat_screen.dart';
 import 'package:uniconnect/widgets/expandable_text.dart';
 
-class EventDetailsScreen extends StatefulWidget {
+class EventDetailsScreen extends StatelessWidget {
   static const routeName = "/details";
 
   final EventModel event;
@@ -13,26 +16,19 @@ class EventDetailsScreen extends StatefulWidget {
   });
 
   @override
-  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
-}
-
-class _EventDetailsScreenState extends State<EventDetailsScreen> {
-  bool going = false;
-
-  @override
   Widget build(BuildContext context) {
-    final e = widget.event;
+    final user = context.read<AuthProvider>().user;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
-          /// 🔹 IMAGE HEADER (FIGMA STYLE)
+          /// 🔹 HEADER (IMAGE + BACK + GOING)
           SliverPersistentHeader(
             pinned: true,
             delegate: _EventHeader(
-              going: going,
-              onToggle: () => setState(() => going = !going),
+              eventId: event.id,
+              userId: user?.uid,
             ),
           ),
 
@@ -45,7 +41,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 children: [
                   // TITLE
                   Text(
-                    e.title,
+                    event.title,
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
@@ -57,15 +53,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   // META
                   _InfoRow(
                     icon: Icons.category_outlined,
-                    text: e.category,
+                    text: event.category,
                   ),
                   _InfoRow(
                     icon: Icons.pin_drop_outlined,
-                    text: e.location,
+                    text: event.location,
                   ),
                   _InfoRow(
                     icon: Icons.calendar_today_outlined,
-                    text: "${_fmtDate(e.date)} • ${e.time}",
+                    text: "${_fmtDate(event.date)} • ${event.time}",
+                  ),
+
+                  // 🔥 REALTIME ATTENDEE COUNT
+                  StreamBuilder<int>(
+                    stream: EventStore.streamAttendeeCount(event.id),
+                    builder: (context, snapshot) {
+                      final count = snapshot.data ?? 0;
+                      return _InfoRow(
+                        icon: Icons.people_outline,
+                        text: "$count people going",
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 20),
@@ -73,12 +81,41 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   // DESCRIPTION
                   ExpandableText(
                     allowed: 3,
-                    str: e.description,
+                    str: event.description,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // 🔥 CHAT BUTTON (STEP 9)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text("Open Event Chat"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          ChatScreen.routeName,
+                          arguments: ChatScreenArguments(
+                            eventId: event.id,
+                            title: event.title,
+                          ),
+                        );
+                      },
+                    ),
                   ),
 
                   const SizedBox(height: 32),
 
-                  // GALLERY
+                  // GALLERY (mock)
                   const Text(
                     "Gallery",
                     style: TextStyle(
@@ -127,14 +164,14 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   }
 }
 
-/// 🔹 HEADER (IMAGE + BACK + GOING)
+/// ───────────────── HEADER ─────────────────
 class _EventHeader extends SliverPersistentHeaderDelegate {
-  final bool going;
-  final VoidCallback onToggle;
+  final String eventId;
+  final String? userId;
 
   _EventHeader({
-    required this.going,
-    required this.onToggle,
+    required this.eventId,
+    required this.userId,
   });
 
   @override
@@ -176,26 +213,51 @@ class _EventHeader extends SliverPersistentHeaderDelegate {
           ),
         ),
 
-        // GOING BUTTON
-        Positioned(
-          right: 16,
-          bottom: 16,
-          child: ElevatedButton.icon(
-            onPressed: onToggle,
-            icon: Icon(going ? Icons.check : Icons.close),
-            label: Text(going ? "Going" : "Not Going"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor:
-              going ? Colors.purple[100] : Colors.red[100],
-              foregroundColor: Colors.black,
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+        // 🔥 GOING BUTTON (REALTIME)
+        if (userId != null)
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: StreamBuilder<bool>(
+              stream: EventStore.isUserGoing(
+                eventId: eventId,
+                userId: userId!,
               ),
+              builder: (context, snapshot) {
+                final isGoing = snapshot.data ?? false;
+
+                return ElevatedButton.icon(
+                  onPressed: () async {
+                    if (isGoing) {
+                      await EventStore.leaveEvent(
+                        eventId: eventId,
+                        userId: userId!,
+                      );
+                    } else {
+                      await EventStore.joinEvent(
+                        eventId: eventId,
+                        userId: userId!,
+                      );
+                    }
+                  },
+                  icon: Icon(isGoing ? Icons.check : Icons.close),
+                  label: Text(isGoing ? "Going" : "Not Going"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    isGoing ? Colors.purple[100] : Colors.red[100],
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-        ),
       ],
     );
   }
@@ -205,7 +267,7 @@ class _EventHeader extends SliverPersistentHeaderDelegate {
       true;
 }
 
-/// 🔹 INFO ROW
+/// ───────────────── INFO ROW ─────────────────
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String text;

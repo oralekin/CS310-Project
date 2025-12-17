@@ -1,16 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'admin_event_approval_screen.dart';
 import 'admin_login.dart';
 import 'create_event.dart';
 import 'home_screen.dart';
-import 'login_screen.dart'; // ⭐ Ekledik: Logout buraya gönderecek
+import 'login_screen.dart';
 
-class AdminHomeScreen extends StatelessWidget {
+class AdminHomeScreen extends StatefulWidget {
   static const routeName = "/adminHome";
 
   const AdminHomeScreen({super.key});
 
   @override
+  State<AdminHomeScreen> createState() => _AdminHomeScreenState();
+}
+
+class _AdminHomeScreenState extends State<AdminHomeScreen> {
+  bool _isLoading = true;
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAdmin();
+  }
+
+  Future<void> _checkAdmin() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _redirectToAdminLogin();
+      return;
+    }
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (!doc.exists || doc.data()?['role'] != 'admin') {
+      _redirectToAdminLogin();
+      return;
+    }
+
+    setState(() {
+      _isAdmin = true;
+      _isLoading = false;
+    });
+  }
+
+  void _redirectToAdminLogin() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacementNamed(
+        context,
+        AdminLoginScreen.routeName,
+      );
+    });
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      LoginScreen.routeName,
+          (route) => false,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // 🔄 Loading
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // ❌ Safety fallback (normalde buraya düşmez)
+    if (!_isAdmin) {
+      return const Scaffold(
+        body: Center(child: Text("Access denied")),
+      );
+    }
+
+    // ✅ ADMIN DASHBOARD
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       body: SafeArea(
@@ -33,19 +110,23 @@ class AdminHomeScreen extends StatelessWidget {
               // --- MANAGE EVENTS ---
               ActionCard(
                 icon: Icons.event_note_outlined,
-                title: 'Manage Events',
-                subtitle: 'Approve or delete events',
+                title: 'Approve Events',
+                subtitle: 'Approve or reject events',
                 onTap: () {
-                  Navigator.pushNamed(context, CreateEventScreen.routeName);
+                  Navigator.pushNamed(
+                    context,
+                    AdminEventApprovalScreen.routeName,
+                  );
                 },
               ),
+
               const SizedBox(height: 16),
 
               // --- MANAGE CLUB ---
               ActionCard(
                 icon: Icons.group_outlined,
                 title: 'Manage Club',
-                subtitle: 'Edit club profiles',
+                subtitle: 'Edit club profile',
                 onTap: () {},
               ),
               const SizedBox(height: 16),
@@ -54,7 +135,7 @@ class AdminHomeScreen extends StatelessWidget {
               ActionCard(
                 icon: Icons.bar_chart_outlined,
                 title: 'View Reports',
-                subtitle: 'See user activity',
+                subtitle: 'User activity & stats',
                 onTap: () {},
               ),
 
@@ -66,7 +147,10 @@ class AdminHomeScreen extends StatelessWidget {
                 height: 45,
                 child: OutlinedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, UserHomeScreen.routeName);
+                    Navigator.pushNamed(
+                      context,
+                      UserHomeScreen.routeName,
+                    );
                   },
                   child: const Text(
                     'Go to Home Feed',
@@ -77,18 +161,12 @@ class AdminHomeScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // LOG OUT → LoginScreen
+              // LOG OUT
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      LoginScreen.routeName, // ⭐ User Login Screen
-                          (route) => false,  // ⭐ Tüm stack’i sil
-                    );
-                  },
+                  onPressed: _logout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2F80ED),
                     shape: RoundedRectangleBorder(
@@ -132,6 +210,7 @@ class ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),

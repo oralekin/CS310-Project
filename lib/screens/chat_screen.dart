@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/chat_store.dart';
+import '../models/chat_message.dart';
+import '../providers/auth_provider.dart';
 
 class ChatScreenArguments {
-  final String categoryLabel;
-  final String chatTitle;
+  final String eventId;
+  final String title;
 
   const ChatScreenArguments({
-    required this.categoryLabel,
-    required this.chatTitle,
+    required this.eventId,
+    required this.title,
   });
 }
 
@@ -20,31 +24,21 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final List<Map<String, dynamic>> _messages = [
-    {
-      "text": "Hey everyone! Are you coming to the AI Workshop tomorrow? 🤖",
-      "isMe": false,
-    },
-    {
-      "text": "Yes! I just registered this morning 🙌",
-      "isMe": true,
-    },
-    {
-      "text": "Nice! Don’t forget to bring your laptop 💻",
-      "isMe": false,
-    },
-  ];
-
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  void _sendMessage() {
+  Future<void> _sendMessage(
+      String eventId,
+      String userId,
+      ) async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _messages.insert(0, {"text": text, "isMe": true});
-    });
+    await ChatStore.sendMessage(
+      eventId: eventId,
+      text: text,
+      senderId: userId,
+    );
 
     _controller.clear();
   }
@@ -56,31 +50,13 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  Widget _buildBubble(String text, bool isMe) {
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          color: isMe ? const Color(0xFFCFF5C2) : const Color(0xFFEDEDED),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 14),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final args =
-    ModalRoute.of(context)?.settings.arguments as ChatScreenArguments?;
+    ModalRoute.of(context)!.settings.arguments as ChatScreenArguments;
 
-    final categoryLabel = args?.categoryLabel ?? "Event Chat";
-    final chatTitle = args?.chatTitle ?? "Chat";
+    final user = context.read<AuthProvider>().user!;
+    final eventId = args.eventId;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3F3F3),
@@ -97,24 +73,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
-                    child: Column(
-                      children: [
-                        Text(
-                          categoryLabel,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          chatTitle,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      args.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -123,14 +88,46 @@ class _ChatScreenState extends State<ChatScreen> {
 
             // 🔹 MESSAGES
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                reverse: true,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _messages.length,
-                itemBuilder: (_, i) {
-                  final m = _messages[i];
-                  return _buildBubble(m["text"], m["isMe"]);
+              child: StreamBuilder<List<ChatMessage>>(
+                stream: ChatStore.streamMessages(eventId),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                        child: CircularProgressIndicator());
+                  }
+
+                  final messages = snapshot.data!;
+
+                  return ListView.builder(
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: messages.length,
+                    itemBuilder: (_, i) {
+                      final m = messages[i];
+                      final isMe = m.senderId == user.uid;
+
+                      return Align(
+                        alignment: isMe
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isMe
+                                ? const Color(0xFFCFF5C2)
+                                : const Color(0xFFEDEDED),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            m.text,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
             ),
@@ -155,7 +152,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.send),
-                    onPressed: _sendMessage,
+                    onPressed: () =>
+                        _sendMessage(eventId, user.uid),
                   ),
                 ],
               ),

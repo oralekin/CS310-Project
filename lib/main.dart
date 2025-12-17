@@ -8,6 +8,8 @@ import 'models/event_store.dart';
 
 // PROVIDERS
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
+
 
 // USER SCREENS
 import 'screens/splash_screen.dart';
@@ -20,6 +22,8 @@ import 'screens/edit_profile_screen.dart';
 import 'screens/my_events_screen.dart';
 import 'screens/invite_friend_screen.dart';
 import 'screens/search_filter_screen.dart';
+import 'screens/joined_events_screen.dart';
+import 'screens/admin_event_approval_screen.dart';
 
 // PROFILE PHOTO FLOW
 import 'screens/change_profile_screen.dart';
@@ -54,10 +58,14 @@ class UniConnectRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthProvider>(
-      create: (_) => AuthProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
       child: const UniConnectApp(),
     );
+
   }
 }
 
@@ -66,66 +74,90 @@ class UniConnectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "UniConnect",
-      initialRoute: SplashScreen.routeName,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: "UniConnect",
+          theme: themeProvider.isDarkMode
+              ? ThemeData.dark()
+              : ThemeData.light(),
 
-      routes: {
-        // USER FLOW
-        SplashScreen.routeName: (ctx) => const SplashScreen(),
-        LoginScreen.routeName: (ctx) => const LoginScreen(),
-        RegisterScreen.routeName: (ctx) => const RegisterScreen(),
-        PasswordResetScreen.routeName: (ctx) =>
-        const PasswordResetScreen(),
-        UserHomeScreen.routeName: (ctx) => const UserHomeScreen(),
-        ProfileScreen.routeName: (ctx) => const ProfileScreen(),
-        EditProfileScreen.routeName: (ctx) => EditProfileScreen(),
-        MyEventsScreen.routeName: (ctx) => const MyEventsScreen(),
-        InviteFriendScreen.routeName: (ctx) =>
-        const InviteFriendScreen(),
-        SearchFilterScreen.routeName: (ctx) =>
-        const SearchFilterScreen(),
+          home: Consumer<AuthProvider>(
+            builder: (context, auth, _) {
+              if (auth.isLoading) {
+                return const SplashScreen();
+              }
+              if (!auth.isLoggedIn) {
+                return const LoginScreen();
+              }
+              return const UserHomeScreen();
+            },
+          ),
 
-        // PROFILE → Photo change
-        ChangeProfileScreen.routeName: (ctx) =>
-        const ChangeProfileScreen(),
-        CameraPreviewScreen.routeName: (ctx) =>
-        const CameraPreviewScreen(),
+          routes: {
+            // USER FLOW
+            SplashScreen.routeName: (ctx) => const SplashScreen(),
+            LoginScreen.routeName: (ctx) => const LoginScreen(),
+            RegisterScreen.routeName: (ctx) => const RegisterScreen(),
+            PasswordResetScreen.routeName: (ctx) =>
+            const PasswordResetScreen(),
+            UserHomeScreen.routeName: (ctx) => const UserHomeScreen(),
+            ProfileScreen.routeName: (ctx) => const ProfileScreen(),
+            EditProfileScreen.routeName: (ctx) => EditProfileScreen(),
+            MyEventsScreen.routeName: (ctx) => const MyEventsScreen(),
+            InviteFriendScreen.routeName: (ctx) =>
+            const InviteFriendScreen(),
+            SearchFilterScreen.routeName: (ctx) =>
+            const SearchFilterScreen(),
+            JoinedEventsScreen.routeName: (ctx) => const JoinedEventsScreen(),
+            AdminEventApprovalScreen.routeName: (ctx) =>
+            const AdminEventApprovalScreen(),
 
-        // ADMIN
-        AdminLoginScreen.routeName: (ctx) =>
-        const AdminLoginScreen(),
-        AdminHomeScreen.routeName: (ctx) =>
-        const AdminHomeScreen(),
-        CreateEventScreen.routeName: (ctx) =>
-        const CreateEventScreen(),
 
-        // CHAT
-        ChatScreen.routeName: (ctx) => const ChatScreen(),
-      },
 
-      // 🔑 ARGUMENT GEREKTİREN SAYFALAR
-      onGenerateRoute: (settings) {
-        // EVENT DETAILS (EventModel gönderiyoruz)
-        if (settings.name == EventDetailsScreen.routeName) {
-          final event = settings.arguments as EventModel;
-          return MaterialPageRoute(
-            builder: (_) => EventDetailsScreen(event: event),
-          );
-        }
+            // PROFILE → Photo change
+            ChangeProfileScreen.routeName: (ctx) =>
+            const ChangeProfileScreen(),
+            CameraPreviewScreen.routeName: (ctx) =>
+            const CameraPreviewScreen(),
 
-        // GALLERY PREVIEW (String path gönderiyoruz)
-        if (settings.name == GalleryPreviewScreen.routeName) {
-          final imagePath = settings.arguments as String;
-          return MaterialPageRoute(
-            builder: (_) =>
-                GalleryPreviewScreen(imagePath: imagePath),
-          );
-        }
+            // ADMIN
+            AdminLoginScreen.routeName: (ctx) =>
+            const AdminLoginScreen(),
+            AdminHomeScreen.routeName: (ctx) =>
+            const AdminHomeScreen(),
+            CreateEventScreen.routeName: (ctx) =>
+            const CreateEventScreen(),
 
-        return null;
+            // CHAT
+            ChatScreen.routeName: (ctx) => const ChatScreen(),
+          },
+
+          // 🔑 ARGUMENT GEREKTİREN SAYFALAR
+          onGenerateRoute: (settings) {
+            // EVENT DETAILS (EventModel gönderiyoruz)
+            if (settings.name == EventDetailsScreen.routeName) {
+              final event = settings.arguments as EventModel;
+              return MaterialPageRoute(
+                builder: (_) => EventDetailsScreen(event: event),
+              );
+            }
+
+            // GALLERY PREVIEW (String path gönderiyoruz)
+            if (settings.name == GalleryPreviewScreen.routeName) {
+              final imagePath = settings.arguments as String;
+              return MaterialPageRoute(
+                builder: (_) =>
+                    GalleryPreviewScreen(imagePath: imagePath),
+              );
+            }
+
+            return null;
+          },
+        );
       },
     );
+
   }
 }

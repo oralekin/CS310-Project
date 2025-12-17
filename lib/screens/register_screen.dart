@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const routeName = '/register';
@@ -36,13 +38,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isSubmitting = true);
 
-    // TODO: backend'de register işlemi
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      await context.read<AuthProvider>().signUp(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
-    setState(() => _isSubmitting = false);
-
-    // Register başarılı → login'e yönlendir
-    Navigator.of(context).pushReplacementNamed('/login');
+      // ❗ Navigation yok
+      // Auth state değişince main.dart otomatik yönlendirecek
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   void _goToLogin() {
@@ -171,7 +187,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding:
+                          const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -183,14 +200,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
+                            AlwaysStoppedAnimation<Color>(
+                                Colors.white),
                           ),
                         )
                             : const Text(
                           "Register",
                           style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),

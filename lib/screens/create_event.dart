@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/event_store.dart';
+import '../providers/auth_provider.dart';
 
 class CreateEventScreen extends StatefulWidget {
   static const routeName = "/createEvent";
@@ -13,284 +15,145 @@ class CreateEventScreen extends StatefulWidget {
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  String _title = '';
-  String _description = '';
-  String _location = '';
-  String? _selectedCategory;
-  String _dateText = 'Pick Date';
-  String _timeText = 'Pick Time';
+  final _titleController = TextEditingController();
+  final _categoryController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
-  DateTime? _selectedDate; // ✅ ARKA PLANDA DateTime TUTULUR
+  DateTime? _selectedDate;
+  bool _isLoading = false;
 
-  final List<String> _categories = [
-    'Workshop',
-    'Social',
-    'Sports',
-    'Seminar',
-  ];
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
 
-  void _saveEvent() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      if (_selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please pick a date')),
-        );
-        return;
-      }
-
-      globalEvents.add(
-        EventModel(
-          title: _title,
-          description: _description,
-          category: _selectedCategory ?? '',
-          date: _selectedDate!, // ✅ ARTIK DateTime
-          time: _timeText,
-          location: _location,
-        ),
-      );
-
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Event Saved'),
-          content: const Text('Your event has been created successfully.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/adminHome');
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate() || _selectedDate == null) {
+      return;
+    }
+
+    final auth = context.read<AuthProvider>();
+    final user = auth.user;
+
+    if (user == null) return;
+
+    setState(() => _isLoading = true);
+
+    final event = EventModel(
+      id: "", // Firestore otomatik verecek
+      title: _titleController.text.trim(),
+      category: _categoryController.text.trim(),
+      date: _selectedDate!,
+      time: _timeController.text.trim(),
+      location: _locationController.text.trim(),
+      description: _descriptionController.text.trim(),
+      ownerId: user.uid,
+      isApproved: false, // ✅ admin onayı bekleyecek
+    );
+
+
+    await EventStore.addEvent(event);
+
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _categoryController.dispose();
+    _timeController.dispose();
+    _locationController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/adminHome');
-                  },
+      appBar: AppBar(
+        title: const Text("Create Event"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: "Title"),
+                validator: (v) =>
+                v == null || v.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _categoryController,
+                decoration: const InputDecoration(labelText: "Category"),
+                validator: (v) =>
+                v == null || v.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _timeController,
+                decoration: const InputDecoration(labelText: "Time"),
+                validator: (v) =>
+                v == null || v.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _locationController,
+                decoration: const InputDecoration(labelText: "Location"),
+                validator: (v) =>
+                v == null || v.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _descriptionController,
+                decoration:
+                const InputDecoration(labelText: "Description"),
+                maxLines: 3,
+                validator: (v) =>
+                v == null || v.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 16),
+
+              ListTile(
+                title: Text(
+                  _selectedDate == null
+                      ? "Select Date"
+                      : "Date: ${_selectedDate!.toLocal().toString().split(" ")[0]}",
                 ),
-                const SizedBox(height: 4),
-                const Center(
-                  child: Text(
-                    'Create Event',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: _pickDate,
+              ),
+              const SizedBox(height: 24),
 
-                const Text('Event Title',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 6),
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'Enter event title',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) =>
-                  (value == null || value.isEmpty)
-                      ? 'Title cannot be empty'
-                      : null,
-                  onSaved: (value) => _title = value ?? '',
-                ),
-
-                const SizedBox(height: 16),
-
-                const Text('Description',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 6),
-                TextFormField(
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Short event description...',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) =>
-                  (value == null || value.isEmpty)
-                      ? 'Description cannot be empty'
-                      : null,
-                  onSaved: (value) => _description = value ?? '',
-                ),
-
-                const SizedBox(height: 16),
-
-                const Text('Category',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 6),
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  value: _selectedCategory,
-                  hint: const Text('Select category'),
-                  items: _categories
-                      .map((c) =>
-                      DropdownMenuItem(value: c, child: Text(c)))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedCategory = value);
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                const Text('Date & Time',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 6),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: now,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2035),
-                          );
-
-                          if (picked != null) {
-                            setState(() {
-                              _selectedDate = picked;
-                              _dateText =
-                              "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-                            });
-                          }
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(_dateText,
-                                style:
-                                const TextStyle(color: Colors.black87)),
-                            const SizedBox(width: 6),
-                            const Icon(Icons.calendar_today_outlined,
-                                size: 18, color: Colors.black87),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        onPressed: () async {
-                          final picked = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.now(),
-                          );
-
-                          if (picked != null) {
-                            setState(() {
-                              _timeText = picked.format(context);
-                            });
-                          }
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(_timeText,
-                                style:
-                                const TextStyle(color: Colors.black87)),
-                            const SizedBox(width: 6),
-                            const Icon(Icons.access_time,
-                                size: 18, color: Colors.black87),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                const Text('Location',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 6),
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'e.g. FMAN G040',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) =>
-                  (value == null || value.isEmpty)
-                      ? 'Location cannot be empty'
-                      : null,
-                  onSaved: (value) => _location = value ?? '',
-                ),
-
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _saveEvent,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Save Event',
-                      style:
-                      TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-              ],
-            ),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _submit,
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text("Create Event"),
+              ),
+            ],
           ),
         ),
       ),

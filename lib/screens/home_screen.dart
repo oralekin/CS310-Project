@@ -5,7 +5,6 @@ import 'event_details_screen.dart';
 import 'profile_screen.dart';
 import 'chat_screen.dart';
 
-
 class UserHomeScreen extends StatefulWidget {
   static const routeName = "/userHome";
 
@@ -18,22 +17,6 @@ class UserHomeScreen extends StatefulWidget {
 class _UserHomeScreenState extends State<UserHomeScreen> {
   String? _query;
   List<String> _categories = [];
-
-  List<EventModel> get _filteredEvents {
-    return globalEvents.where((e) {
-      if (_query != null && _query!.isNotEmpty) {
-        if (!e.title.toLowerCase().contains(_query!.toLowerCase())) {
-          return false;
-        }
-      }
-
-      if (_categories.isNotEmpty && !_categories.contains(e.category)) {
-        return false;
-      }
-
-      return true;
-    }).toList();
-  }
 
   Future<void> _openFilters() async {
     final result = await Navigator.pushNamed(
@@ -102,7 +85,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // POPULAR EVENTS
+                    // POPULAR EVENTS (mock)
                     const Text(
                       "Popular Events",
                       style: TextStyle(
@@ -127,7 +110,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     const Divider(),
                     const SizedBox(height: 16),
 
-                    // NEW EVENTS
+                    // ───────── NEW EVENTS (🔥 FIRESTORE REALTIME) ─────────
                     const Text(
                       "New Events",
                       style: TextStyle(
@@ -137,15 +120,56 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    Column(
-                      children: _filteredEvents
-                          .map(
-                            (event) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _NewEventCard(event: event),
-                        ),
-                      )
-                          .toList(),
+                    StreamBuilder<List<EventModel>>(
+                      stream: EventStore.streamApprovedEvents(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return const Text("Something went wrong.");
+                        }
+
+
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Text("No events yet.");
+                        }
+
+                        final events = snapshot.data!.where((e) {
+                          if (_query != null && _query!.isNotEmpty) {
+                            if (!e.title
+                                .toLowerCase()
+                                .contains(_query!.toLowerCase())) {
+                              return false;
+                            }
+                          }
+
+                          if (_categories.isNotEmpty &&
+                              !_categories.contains(e.category)) {
+                            return false;
+                          }
+
+                          return true;
+                        }).toList();
+
+                        return Column(
+                          children: events
+                              .map(
+                                (event) => Padding(
+                              padding:
+                              const EdgeInsets.only(bottom: 12),
+                              child: _NewEventCard(event: event),
+                            ),
+                          )
+                              .toList(),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -166,23 +190,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // HOME
             IconButton(
               icon: const Icon(Icons.home_outlined),
-              onPressed: () {
-                // zaten home'dayız
-              },
+              onPressed: () {},
             ),
-
-            // PROFILE ✅
             IconButton(
               icon: const Icon(Icons.person_outline),
               onPressed: () {
                 Navigator.pushNamed(context, ProfileScreen.routeName);
               },
             ),
-
-            // CHAT
             IconButton(
               icon: const Icon(Icons.chat_bubble_outline),
               onPressed: () {
@@ -192,7 +209,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ],
         ),
       ),
-
     );
   }
 }
@@ -222,7 +238,7 @@ class _PopularEventCard extends StatelessWidget {
   }
 }
 
-// ───────── NEW EVENT CARD → DETAILS ─────────
+// ───────── EVENT CARD → DETAILS ─────────
 class _NewEventCard extends StatelessWidget {
   final EventModel event;
 
@@ -256,7 +272,8 @@ class _NewEventCard extends StatelessWidget {
                 children: [
                   Text(
                     event.title,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style:
+                    const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
                   Text(

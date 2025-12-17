@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import 'admin_login.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,11 +32,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
 
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() => _isSubmitting = false);
-
-    Navigator.of(context).pushReplacementNamed(UserHomeScreen.routeName);
+    try {
+      await context.read<AuthProvider>().signIn(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+      // ❗ navigation YOK
+      // authStateChanges → main.dart otomatik yönlendirecek
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   void _goToRegister() {

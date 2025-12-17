@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PasswordResetScreen extends StatefulWidget {
   static const routeName = '/password-reset';
@@ -26,13 +27,34 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
 
     setState(() => _isSubmitting = true);
 
-    // TODO: backend reset email request
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _emailController.text.trim(),
+      );
 
-    setState(() => _isSubmitting = false);
+      if (!mounted) return;
 
-    // Reset başarılı → confirmation screen
-    Navigator.of(context).pushNamed('/reset-confirmation');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Password reset link has been sent to your email.",
+          ),
+        ),
+      );
+
+      // Reset mail gönderildi → Login ekranına dön
+      Navigator.of(context).pushReplacementNamed('/login');
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? "Something went wrong"),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   void _backToLogin() {
@@ -76,7 +98,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Email Input
+                    // EMAIL
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -89,7 +111,9 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                           borderSide: BorderSide.none,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 14),
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -104,13 +128,13 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
 
                     const SizedBox(height: 20),
 
-                    // Send Reset Link Button (gri buton)
+                    // SEND RESET LINK BUTTON
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _isSubmitting ? null : _sendResetLink,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade500,
+                          backgroundColor: Colors.grey.shade700,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
