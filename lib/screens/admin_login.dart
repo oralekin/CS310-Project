@@ -25,16 +25,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 🔐 Firebase Auth login
-      final cred = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _email.trim(),
         password: _password.trim(),
       );
 
       final uid = cred.user!.uid;
 
-      // 🧾 Firestore → admin role yaz / güncelle
       await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
@@ -46,7 +43,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
       if (!mounted) return;
 
-      // ✅ Admin dashboard
       Navigator.pushReplacementNamed(context, '/adminHome');
     } catch (e) {
       showDialog(
@@ -63,9 +59,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -73,6 +67,18 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
+
+      // ✅ EKLENEN KISIM
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF2F2F2),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      // ✅ EKLENEN KISIM BİTTİ
+
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -81,7 +87,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
 
                   const Text(
                     'Admin Login',
@@ -94,7 +100,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                   const SizedBox(height: 40),
 
-                  // EMAIL
                   TextFormField(
                     decoration: InputDecoration(
                       hintText: 'Club mail address',
@@ -122,7 +127,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                   const SizedBox(height: 16),
 
-                  // PASSWORD
                   TextFormField(
                     obscureText: true,
                     decoration: InputDecoration(
@@ -163,9 +167,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         ),
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
+                          ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
                         'Login as Admin',
                         style: TextStyle(
