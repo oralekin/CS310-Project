@@ -46,9 +46,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   /// 🔥 FIREBASE INIT (FlutterFire CLI uyumlu)
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.debug,
