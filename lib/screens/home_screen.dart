@@ -216,7 +216,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             IconButton(
               icon: const Icon(Icons.chat_bubble_outline),
               onPressed: () {
-                Navigator.pushNamed(context, ChatScreen.routeName);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Open an event to access its chat."),
+                  ),
+                );
               },
             ),
           ],

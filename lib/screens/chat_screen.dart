@@ -52,10 +52,51 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final args =
-    ModalRoute.of(context)!.settings.arguments as ChatScreenArguments;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    final args = routeArgs is ChatScreenArguments ? routeArgs : null;
+    final user = context.read<AuthProvider>().user;
 
-    final user = context.read<AuthProvider>().user!;
+    if (args == null || user == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF3F3F3),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "Event Chat",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    "Select an event to open its chat.",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final eventId = args.eventId;
 
     return Scaffold(
@@ -153,7 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: () =>
-                        _sendMessage(eventId, user.uid),
+                    _sendMessage(eventId, user.uid),
                   ),
                 ],
               ),
