@@ -24,6 +24,15 @@ UniConnect is a multi-university club event platform for students to discover, s
    - Android: place `google-services.json` in `android/app`
    - iOS: place `GoogleService-Info.plist` in `ios/Runner`
 4. Ensure Firestore and Auth are enabled in the Firebase console.
+5. If authentication is blocked on Android, verify:
+   - The Firebase Android app uses the same package name as `android/app/build.gradle.kts`.
+   - Your debug SHA-1 fingerprint is registered in Firebase Console.
+   - App Check / reCAPTCHA settings allow development builds.
+6. Firestore rules are defined in `firestore.rules`.
+
+## Platform Notes
+- iOS/Web/macOS/Windows/Linux require additional Firebase configuration via `flutterfire configure`.
+- If a platform is not configured, `firebase_options.dart` will throw an `UnsupportedError`.
 
 ## Run
 `flutter run`
