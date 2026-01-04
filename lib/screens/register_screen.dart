@@ -17,9 +17,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
   static const String _adminAccessCode = 'UNICONNECT_ADMIN_2025';
 
   String _selectedRole = 'student';
+  String? _selectedUniversity;
+
+  final List<String> _universities = [
+    'Sabanci University',
+    'Bogazici University',
+    'Koc University',
+    'METU',
+    'ITU',
+    'Bilkent University',
+    'Hacettepe University',
+    'Other',
+  ];
 
   final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _universityController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -32,7 +43,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _fullNameController.dispose();
-    _universityController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -54,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _passwordController.text.trim(),
         role: _selectedRole,
         fullName: _fullNameController.text.trim(),
-        university: _universityController.text.trim(),
+        university: (_selectedUniversity ?? '').trim(),
         clubName: _selectedRole == 'admin'
             ? _clubNameController.text.trim()
             : null,
@@ -183,17 +193,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                      // University
-                      TextFormField(
-                        controller: _universityController,
-                        decoration: _inputDecoration("University"),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter your university";
-                          }
-                          return null;
-                        },
-                      ),
+                    // University
+                    DropdownButtonFormField<String>(
+                      value: _selectedUniversity,
+                      decoration: _inputDecoration("University"),
+                      items: _universities
+                          .map(
+                            (uni) => DropdownMenuItem<String>(
+                              value: uni,
+                              child: Text(uni),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() => _selectedUniversity = value);
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please select your university";
+                        }
+                        return null;
+                      },
+                    ),
                       const SizedBox(height: 12),
 
                       if (_selectedRole == 'admin') ...[
