@@ -83,17 +83,7 @@ class UniConnectApp extends StatelessWidget {
               ? ThemeData.dark()
               : ThemeData.light(),
 
-          home: Consumer<AuthProvider>(
-            builder: (context, auth, _) {
-              if (auth.isLoading) {
-                return const SplashScreen();
-              }
-              if (!auth.isLoggedIn) {
-                return const LoginScreen();
-              }
-              return const UserHomeScreen();
-            },
-          ),
+          home: const SplashScreen(),
 
           routes: {
             // USER FLOW
