@@ -84,10 +84,13 @@ class ProfileScreen extends StatelessWidget {
         builder: (context, snapshot) {
           final data = snapshot.data?.data();
           final fullName = data?['fullName']?.toString().trim();
+          final name = data?['name']?.toString().trim();
           final email =
               data?['email']?.toString().trim() ?? user.email ?? '';
           final displayName = (fullName != null && fullName.isNotEmpty)
               ? fullName
+              : (name != null && name.isNotEmpty)
+              ? name
               : (user.displayName ?? 'User');
 
           return SingleChildScrollView(
