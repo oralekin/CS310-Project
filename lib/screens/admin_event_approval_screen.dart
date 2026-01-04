@@ -19,6 +19,14 @@ class AdminEventApprovalScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                "Failed to load pending events.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
+          }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(

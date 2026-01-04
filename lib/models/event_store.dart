@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// 🔹 EVENT MODEL
 class EventModel {
   final String id;
   final String title;
@@ -26,26 +25,29 @@ class EventModel {
     required this.isApproved,
   });
 
-  /// 🔥 Firestore → Model
   factory EventModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc,
-      ) {
-    final data = doc.data()!;
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() ?? {};
+    final dateValue = data['date'];
+    final parsedDate = dateValue is Timestamp
+        ? dateValue.toDate()
+        : DateTime.fromMillisecondsSinceEpoch(0);
+
     return EventModel(
       id: doc.id,
-      title: data['title'],
-      category: data['category'],
-      date: (data['date'] as Timestamp).toDate(),
-      time: data['time'],
-      location: data['location'],
-      university: data['university'] ?? '',
-      description: data['description'],
-      ownerId: data['ownerId'],
+      title: (data['title'] ?? '').toString(),
+      category: (data['category'] ?? '').toString(),
+      date: parsedDate,
+      time: (data['time'] ?? '').toString(),
+      location: (data['location'] ?? '').toString(),
+      university: (data['university'] ?? '').toString(),
+      description: (data['description'] ?? '').toString(),
+      ownerId: (data['ownerId'] ?? '').toString(),
       isApproved: data['isApproved'] ?? false,
     );
   }
 
-  /// 🔥 Model → Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'title': title,
@@ -63,74 +65,85 @@ class EventModel {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is EventModel && other.id == id;
+      identical(this, other) || other is EventModel && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
 }
 
-/// 🔥 FIRESTORE EVENT STORE
 class EventStore {
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
   static final CollectionReference<Map<String, dynamic>> _eventsRef =
-  _db.collection('events');
+      _db.collection('events');
 
-  // ───────────────── USER EVENTS ─────────────────
+  static EventModel? _tryFromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    try {
+      return EventModel.fromFirestore(doc);
+    } catch (_) {
+      return null;
+    }
+  }
 
-  /// ✅ REALTIME: SADECE ONAYLI event’ler (USER HOME FEED)
   static Stream<List<EventModel>> streamApprovedEvents() {
     return _eventsRef
         .where('isApproved', isEqualTo: true)
         .orderBy('date')
         .snapshots()
-        .map(
-          (snapshot) =>
-          snapshot.docs.map(EventModel.fromFirestore).toList(),
-    );
+        .map((snapshot) {
+      final events = <EventModel>[];
+      for (final doc in snapshot.docs) {
+        final event = _tryFromFirestore(doc);
+        if (event != null) {
+          events.add(event);
+        }
+      }
+      return events;
+    });
   }
 
-  /// ✅ REALTIME: Kullanıcının OLUŞTURDUĞU event’ler
   static Stream<List<EventModel>> streamMyEvents(String userId) {
     return _eventsRef
         .where('ownerId', isEqualTo: userId)
         .snapshots()
-        .map(
-          (snapshot) =>
-          snapshot.docs.map(EventModel.fromFirestore).toList(),
-    );
+        .map((snapshot) {
+      final events = <EventModel>[];
+      for (final doc in snapshot.docs) {
+        final event = _tryFromFirestore(doc);
+        if (event != null) {
+          events.add(event);
+        }
+      }
+      return events;
+    });
   }
 
-  /// ✅ CREATE EVENT
   static Future<void> addEvent(EventModel event) {
     return _eventsRef.add(event.toFirestore());
   }
 
-  // ───────────────── ADMIN (APPROVAL FLOW) ─────────────────
-
-  /// 👑 ADMIN: Onay BEKLEYEN event’ler
   static Stream<List<EventModel>> streamPendingEvents() {
-    return _eventsRef.snapshots().map(
-          (snapshot) => snapshot.docs
-              .map(EventModel.fromFirestore)
-              .where((event) => !event.isApproved)
-              .toList(),
-        );
+    return _eventsRef.snapshots().map((snapshot) {
+      final pendingEvents = <EventModel>[];
+      for (final doc in snapshot.docs) {
+        final event = _tryFromFirestore(doc);
+        if (event != null && !event.isApproved) {
+          pendingEvents.add(event);
+        }
+      }
+      return pendingEvents;
+    });
   }
 
-  /// 👑 ADMIN: Event onayla
   static Future<void> approveEvent(String eventId) {
     return _eventsRef.doc(eventId).update({'isApproved': true});
   }
 
-  /// 👑 ADMIN: Event sil
   static Future<void> deleteEvent(String eventId) {
     return _eventsRef.doc(eventId).delete();
   }
 
-  // ───────────────── ATTENDANCE (STEP 5) ─────────────────
-
-  /// 🔹 Realtime: kullanıcı bu event’e katılıyor mu?
   static Stream<bool> isUserGoing({
     required String eventId,
     required String userId,
@@ -143,7 +156,6 @@ class EventStore {
         .map((doc) => doc.exists);
   }
 
-  /// 🔹 Event’e katıl
   static Future<void> joinEvent({
     required String eventId,
     required String userId,
@@ -157,7 +169,6 @@ class EventStore {
     });
   }
 
-  /// 🔹 Event’ten ayrıl
   static Future<void> leaveEvent({
     required String eventId,
     required String userId,
@@ -169,7 +180,6 @@ class EventStore {
         .delete();
   }
 
-  /// ✅ REALTIME: Attendee sayısı
   static Stream<int> streamAttendeeCount(String eventId) {
     return _eventsRef
         .doc(eventId)
@@ -178,9 +188,6 @@ class EventStore {
         .map((snapshot) => snapshot.docs.length);
   }
 
-  // ───────────────── JOINED EVENTS (STEP 5.4) ─────────────────
-
-  /// ✅ REALTIME: Kullanıcının KATILDIĞI event’ler
   static Stream<List<EventModel>> streamJoinedEvents(String userId) {
     return _eventsRef.snapshots().asyncMap((snapshot) async {
       final List<EventModel> joinedEvents = [];
@@ -193,7 +200,10 @@ class EventStore {
             .get();
 
         if (attendeeDoc.exists) {
-          joinedEvents.add(EventModel.fromFirestore(doc));
+          final event = _tryFromFirestore(doc);
+          if (event != null) {
+            joinedEvents.add(event);
+          }
         }
       }
 
@@ -201,5 +211,3 @@ class EventStore {
     });
   }
 }
-
-
