@@ -16,6 +16,31 @@
       "api_key": [
         {
           "current_key": "AIzaSyD_M417rygW1d1T_gEhPJAILSXskM3ZeaA"
+        },
+        {
+          "current_key": "AIzaSyD4TGFlQKniqjOiVgQEhCqpcZK3af8B5tY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32125673340:android:17c735bfbc243df326cef9",
+        "android_client_info": {
+          "package_name": "com.uniconnect.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_M417rygW1d1T_gEhPJAILSXskM3ZeaA"
+        },
+        {
+          "current_key": "AIzaSyD4TGFlQKniqjOiVgQEhCqpcZK3af8B5tY"
         }
       ],
       "services": {
