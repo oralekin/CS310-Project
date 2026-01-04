@@ -1,14 +1,49 @@
 # UniConnect
-#### Multi-University Club Event Platform
-This is a group project made for CS310.
-UniConnect is a mobile application that connects student clubs and organizations from universities across the country. It allows students to discover, share, and join university club events such as workshops, seminars, and festivals through a single, user-friendly app.
-The project will first focus on Sabancı University, then expand to include other universities in Turkey.
 
-## Our team
-| Name                | Student ID | Role                             |
-| :------------------ | ---------- | -------------------------------- |
-| Mehmet Sefa Çiftci  | 32496      | Project Coordinator              |
-| Bahar Küçüközer     | 32148      | Documentation & Submission Lead  |
-| Ekin Oral           | 29421      | Integration & Repository Lead    |
-| Melisa Ece Yıldırım | 32053      | Testing & Quality Assurance Lead |
-| Deniz Çolak         | 32342      | Learning & Research Lead         |
+## Overview
+UniConnect is a multi-university club event platform for students to discover, share, and join campus events (workshops, seminars, festivals) in one place.
+
+## Key Features
+- User authentication (sign up, sign in, password reset)
+- Event creation, approval, and browsing
+- Event participation (join/leave) with attendee counts
+- Profile management with photo update flow
+- Basic admin dashboard and approval flow
+- In-app chat
+
+## Tech Stack
+- Flutter (Dart)
+- Firebase: Authentication + Cloud Firestore
+- Provider for state management
+
+## Setup
+1. Install Flutter 3.3+ (Dart 3.3+). Verify with `flutter --version`.
+2. Install dependencies: `flutter pub get`
+3. Configure Firebase for your platforms:
+   - Run `flutterfire configure` to regenerate `lib/firebase_options.dart`, or replace it with your own config.
+   - Android: place `google-services.json` in `android/app`
+   - iOS: place `GoogleService-Info.plist` in `ios/Runner`
+4. Ensure Firestore and Auth are enabled in the Firebase console.
+
+## Run
+`flutter run`
+
+## Tests
+Run all tests with: `flutter test`
+
+Tests included:
+- `test/widget_test.dart`: App launches smoke test (MaterialApp builds).
+- `test/expandable_text_test.dart`: ExpandableText hides toggle for short text and toggles for long text.
+
+## Known Limitations
+- Joined-events stream performs per-event lookups and may be slow for large datasets.
+- No pagination for event lists yet.
+
+## Team
+| Name               | Student ID | Role                            |
+| :----------------- | ---------- | ------------------------------- |
+| Mehmet Sefa Ciftci | 32496      | Project Coordinator             |
+| Bahar Kucuk Ozer   | 32148      | Documentation and Submission    |
+| Ekin Oral          | 29421      | Integration and Repository      |
+| Melisa Ece Yildirim| 32053      | Testing and Quality Assurance   |
+| Deniz Colak        | 32342      | Learning and Research           |
