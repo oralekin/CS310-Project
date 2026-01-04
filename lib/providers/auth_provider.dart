@@ -35,6 +35,7 @@ class AuthProvider with ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       _errorMessage = _mapFirebaseError(e);
       notifyListeners();
+      throw Exception(_errorMessage);
     }
   }
 
@@ -49,6 +50,7 @@ class AuthProvider with ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       _errorMessage = _mapFirebaseError(e);
       notifyListeners();
+      throw Exception(_errorMessage);
     }
   }
 

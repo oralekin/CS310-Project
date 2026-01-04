@@ -33,10 +33,13 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      await context.read<AuthProvider>().signIn(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      await context
+          .read<AuthProvider>()
+          .signIn(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+          )
+          .timeout(const Duration(seconds: 15));
       // ❗ navigation YOK
       // authStateChanges → main.dart otomatik yönlendirecek
     } catch (e) {
