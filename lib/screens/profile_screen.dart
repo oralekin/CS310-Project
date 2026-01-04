@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'edit_profile_screen.dart';
@@ -47,10 +48,19 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+
+    if (user == null) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF5F5F5),
+        body: Center(child: Text("Please log in to view your profile.")),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
 
-      /// 🔹 APP BAR
+      /// ?? APP BAR
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -65,117 +75,136 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
 
-      /// 🔹 BODY
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
+      /// ?? BODY
+      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          final data = snapshot.data?.data();
+          final fullName = data?['fullName']?.toString().trim();
+          final email =
+              data?['email']?.toString().trim() ?? user.email ?? '';
+          final displayName = (fullName != null && fullName.isNotEmpty)
+              ? fullName
+              : (user.displayName ?? 'User');
 
-            /// PROFILE AVATAR
-            const CircleAvatar(
-              radius: 55,
-              backgroundColor: Colors.grey,
-              child: Icon(
-                Icons.person,
-                size: 60,
-                color: Colors.white,
-              ),
-            ),
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
 
-            const SizedBox(height: 14),
-
-            /// NAME
-            const Text(
-              "Name Surname",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            /// EMAIL BADGE
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.blueAccent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                "student@sabanciuniv.edu",
-                style: TextStyle(color: Colors.white, fontSize: 13),
-              ),
-            ),
-
-            const SizedBox(height: 35),
-
-            /// MENU CARD
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 8,
-                    color: Colors.black.withOpacity(0.06),
-                    offset: const Offset(0, 4),
+                /// PROFILE AVATAR
+                const CircleAvatar(
+                  radius: 55,
+                  backgroundColor: Colors.grey,
+                  child: Icon(
+                    Icons.person,
+                    size: 60,
+                    color: Colors.white,
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _buildMenuItem(
-                    icon: Icons.edit,
-                    label: "Edit Profile",
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        EditProfileScreen.routeName,
-                      );
-                    },
+                ),
+
+                const SizedBox(height: 14),
+
+                /// NAME
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  _buildMenuItem(
-                    icon: Icons.bookmark_border,
-                    label: "My Events",
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        MyEventsScreen.routeName,
-                      );
-                    },
+                ),
+
+                const SizedBox(height: 6),
+
+                /// EMAIL BADGE
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
                   ),
-                  _buildMenuItem(
-                    icon: Icons.person_add_alt_1,
-                    label: "Invite a Friend",
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        InviteFriendScreen.routeName,
-                      );
-                    },
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  _buildMenuItem(
-                    icon: Icons.logout,
-                    label: "Logout",
-                    color: Colors.red,
-                    onTap: () async {
-                      await context.read<AuthProvider>().signOut();
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        LoginScreen.routeName,
+                  child: Text(
+                    email.isNotEmpty ? email : "No email",
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+
+                const SizedBox(height: 35),
+
+                /// MENU CARD
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 8,
+                        color: Colors.black.withOpacity(0.06),
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildMenuItem(
+                        icon: Icons.edit,
+                        label: "Edit Profile",
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            EditProfileScreen.routeName,
+                          );
+                        },
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.bookmark_border,
+                        label: "My Events",
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            MyEventsScreen.routeName,
+                          );
+                        },
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.person_add_alt_1,
+                        label: "Invite a Friend",
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            InviteFriendScreen.routeName,
+                          );
+                        },
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.logout,
+                        label: "Logout",
+                        color: Colors.red,
+                        onTap: () async {
+                          await context.read<AuthProvider>().signOut();
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            LoginScreen.routeName,
                             (_) => false,
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            const SizedBox(height: 40),
-          ],
-        ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
