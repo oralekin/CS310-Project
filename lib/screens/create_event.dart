@@ -83,7 +83,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     await EventStore.addEvent(event);
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Event Created"),
+        content: const Text("Your event has been submitted for approval."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+
     if (!mounted) return;
     Navigator.pop(context);
   }

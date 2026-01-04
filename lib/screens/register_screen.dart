@@ -38,27 +38,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isSubmitting = true);
 
+    String? errorMessage;
     try {
-      await context.read<AuthProvider>().signUp(
+      final auth = context.read<AuthProvider>();
+      await auth.signUp(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // ❗ Navigation yok
-      // Auth state değişince main.dart otomatik yönlendirecek
+      errorMessage = auth.errorMessage;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().replaceFirst('Exception: ', ''),
-          ),
-        ),
-      );
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
     }
+
+    if (!mounted) return;
+
+    if (errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+      return;
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Registration Successful"),
+        content: const Text("Your account has been created."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   void _goToLogin() {

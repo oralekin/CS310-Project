@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'edit_profile_screen.dart';
 import 'my_events_screen.dart';
 import 'invite_friend_screen.dart';
 import 'login_screen.dart';
+import '../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   static const routeName = "/profile";
@@ -158,7 +160,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.logout,
                     label: "Logout",
                     color: Colors.red,
-                    onTap: () {
+                    onTap: () async {
+                      await context.read<AuthProvider>().signOut();
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         LoginScreen.routeName,

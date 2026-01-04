@@ -34,6 +34,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isWide = size.width >= 600;
+    final horizontalPadding = isWide ? 24.0 : 16.0;
+    final popularCardWidth = isWide ? 160.0 : 120.0;
+    final popularListHeight = isWide ? 160.0 : 130.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -42,7 +48,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                16,
+                horizontalPadding,
+                12,
+              ),
               color: const Color(0xFFE5E5E5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,7 +92,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             // ───────── CONTENT ─────────
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(horizontalPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -96,10 +107,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     const SizedBox(height: 12),
 
                     SizedBox(
-                      height: 130,
+                      height: popularListHeight,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemBuilder: (_, __) => const _PopularEventCard(),
+                        itemBuilder: (_, __) => _PopularEventCard(
+                          width: popularCardWidth,
+                        ),
                         separatorBuilder: (_, __) =>
                         const SizedBox(width: 12),
                         itemCount: 3,
@@ -215,23 +228,33 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
 // ───────── POPULAR CARD (mock) ─────────
 class _PopularEventCard extends StatelessWidget {
-  const _PopularEventCard();
+  final double width;
+
+  const _PopularEventCard({required this.width});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
+      width: width,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.black12),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(Icons.image_outlined, size: 48),
-          SizedBox(height: 8),
-          Text("Event Title"),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              'images/download.jpg',
+              height: 70,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text("Event Title"),
         ],
       ),
     );
@@ -243,6 +266,9 @@ class _NewEventCard extends StatelessWidget {
   final EventModel event;
 
   const _NewEventCard({required this.event});
+
+  static const _previewImageUrl =
+      'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=400';
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +290,18 @@ class _NewEventCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.image_outlined, size: 50),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                _previewImageUrl,
+                height: 50,
+                width: 50,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.image_outlined, size: 50);
+                },
+              ),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

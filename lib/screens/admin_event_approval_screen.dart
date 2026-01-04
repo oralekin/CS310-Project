@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/event_store.dart';
 
 class AdminEventApprovalScreen extends StatelessWidget {
@@ -14,18 +13,14 @@ class AdminEventApprovalScreen extends StatelessWidget {
         title: const Text("Pending Events"),
         centerTitle: true,
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('events')
-            .where('isApproved', isEqualTo: false)
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
+      body: StreamBuilder<List<EventModel>>(
+        stream: EventStore.streamPendingEvents(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Text(
                 "No events waiting for approval",
@@ -34,14 +29,13 @@ class AdminEventApprovalScreen extends StatelessWidget {
             );
           }
 
-          final docs = snapshot.data!.docs;
+          final events = snapshot.data!;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: docs.length,
+            itemCount: events.length,
             itemBuilder: (context, index) {
-              final doc = docs[index];
-              final event = EventModel.fromFirestore(doc);
+              final event = events[index];
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -79,7 +73,7 @@ class AdminEventApprovalScreen extends StatelessWidget {
                         children: [
                           TextButton(
                             onPressed: () async {
-                              await doc.reference.delete();
+                              await EventStore.deleteEvent(event.id);
                             },
                             child: const Text(
                               "Reject",
@@ -89,9 +83,7 @@ class AdminEventApprovalScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           ElevatedButton(
                             onPressed: () async {
-                              await doc.reference.update({
-                                'isApproved': true,
-                              });
+                              await EventStore.approveEvent(event.id);
                             },
                             child: const Text("Approve"),
                           ),
