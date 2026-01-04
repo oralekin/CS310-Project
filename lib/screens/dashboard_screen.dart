@@ -67,27 +67,24 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     Navigator.pushNamedAndRemoveUntil(
       context,
       LoginScreen.routeName,
-          (route) => false,
+      (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🔄 Loading
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    // ❌ Safety fallback (normalde buraya düşmez)
     if (!_isAdmin) {
       return const Scaffold(
         body: Center(child: Text("Access denied")),
       );
     }
 
-    // ✅ ADMIN DASHBOARD
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       body: SafeArea(
@@ -102,12 +99,25 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 24),
 
-              // --- MANAGE EVENTS ---
+              // ✅ CREATE EVENT (NEW)
+              ActionCard(
+                icon: Icons.add_circle_outline,
+                title: 'Create Event',
+                subtitle: 'Create a new event',
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    CreateEventScreen.routeName,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // APPROVE EVENTS
               ActionCard(
                 icon: Icons.event_note_outlined,
                 title: 'Approve Events',
@@ -120,28 +130,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 },
               ),
 
-              const SizedBox(height: 16),
-
-              // --- MANAGE CLUB ---
-              ActionCard(
-                icon: Icons.group_outlined,
-                title: 'Manage Club',
-                subtitle: 'Edit club profile',
-                onTap: () {},
-              ),
-              const SizedBox(height: 16),
-
-              // --- VIEW REPORTS ---
-              ActionCard(
-                icon: Icons.bar_chart_outlined,
-                title: 'View Reports',
-                subtitle: 'User activity & stats',
-                onTap: () {},
-              ),
-
               const Spacer(),
 
-              // USER HOME FEED
+              // GO TO USER HOME
               SizedBox(
                 width: double.infinity,
                 height: 45,
@@ -152,10 +143,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       UserHomeScreen.routeName,
                     );
                   },
-                  child: const Text(
-                    'Go to Home Feed',
-                    style: TextStyle(color: Colors.black87),
-                  ),
+                  child: const Text('Go to Home Feed'),
                 ),
               ),
 
@@ -178,12 +166,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -221,7 +207,7 @@ class ActionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 32, color: Colors.black87),
+            Icon(icon, size: 32),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +217,6 @@ class ActionCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 4),
