@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_store.dart';
 import '../models/chat_message.dart';
+import '../models/event_store.dart';
 import '../providers/auth_provider.dart';
 
 class ChatScreenArguments {
@@ -56,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final args = routeArgs is ChatScreenArguments ? routeArgs : null;
     final user = context.read<AuthProvider>().user;
 
-    if (args == null || user == null) {
+    if (user == null) {
       return Scaffold(
         backgroundColor: const Color(0xFFF3F3F3),
         body: SafeArea(
@@ -86,9 +87,92 @@ class _ChatScreenState extends State<ChatScreen> {
               const Expanded(
                 child: Center(
                   child: Text(
-                    "Select an event to open its chat.",
+                    "Please log in to access chats.",
                     style: TextStyle(fontSize: 14),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (args == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF3F3F3),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "Event Chats",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: StreamBuilder<List<EventModel>>(
+                  stream: EventStore.streamApprovedEvents(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(
+                        child: Text("No events yet."),
+                      );
+                    }
+
+                    final events = snapshot.data!;
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: events.length,
+                      separatorBuilder: (_, __) =>
+                          const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+                        return ListTile(
+                          title: Text(event.title),
+                          subtitle: Text(
+                            "${event.category} • ${event.time}",
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              ChatScreen.routeName,
+                              arguments: ChatScreenArguments(
+                                eventId: event.id,
+                                title: event.title,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ],
