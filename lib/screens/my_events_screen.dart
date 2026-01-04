@@ -26,7 +26,7 @@ class MyEventsScreen extends StatelessWidget {
       /// 🔹 APP BAR
       appBar: AppBar(
         title: const Text(
-          "Joined Events",
+          "My Events",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
@@ -39,7 +39,7 @@ class MyEventsScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: StreamBuilder<List<EventModel>>(
-          stream: EventStore.streamJoinedEvents(user.uid),
+          stream: EventStore.streamMyEvents(user.uid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -64,7 +64,7 @@ class MyEventsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "You haven't joined any events yet",
+                      "You have no events yet",
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
