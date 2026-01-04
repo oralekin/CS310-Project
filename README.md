@@ -30,6 +30,13 @@ UniConnect is a multi-university club event platform for students to discover, s
    - App Check / reCAPTCHA settings allow development builds.
 6. Firestore rules are defined in `firestore.rules`.
 
+## App Check (Debug Token)
+If Firebase Auth is blocked on Android with a Recaptcha/App Check error:
+1. Run the app and look for a log line like:
+   `Enter this debug secret into the allow list in the Firebase Console for your project: <TOKEN>`
+2. Firebase Console → App Check → Debug tokens → Add debug token and paste the value.
+3. Restart the app.
+
 ## Platform Notes
 - iOS/Web/macOS/Windows/Linux require additional Firebase configuration via `flutterfire configure`.
 - If a platform is not configured, `firebase_options.dart` will throw an `UnsupportedError`.
