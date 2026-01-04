@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.uniconnect.app"
+    namespace = "com.example.uniconnect"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -24,7 +24,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.uniconnect.app"
+        applicationId = "com.example.uniconnect"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -1,4 +1,4 @@
-package com.uniconnect.app
+package com.example.uniconnect
 
 import io.flutter.embedding.android.FlutterActivity
 
