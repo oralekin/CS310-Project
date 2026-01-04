@@ -49,6 +49,22 @@ If Firebase Auth is blocked on Android with a Recaptcha/App Check error:
 - Firestore rules added and published to restrict unauthenticated access.
 - Admin approval uses EventStore service (no direct Firestore in UI).
 - Firebase options configured for web and windows; App Check debug token flow documented.
+- iOS project added with `GoogleService-Info.plist`.
+- Removed machine-specific Gradle Java home path.
+
+## Feedback Status
+Completed:
+- iOS/Web/Windows Firebase configuration added.
+- Windows-specific Gradle path removed.
+- Image.asset + Image.network usage added.
+- Success AlertDialogs added.
+- Basic responsiveness via MediaQuery added.
+- Logout bug fixed.
+- Firestore security rules included.
+
+Remaining:
+- Verify App Check/Auth access is unblocked on all test devices.
+- Record final demo video and submit final report.
 
 ## Run
 `flutter run`
