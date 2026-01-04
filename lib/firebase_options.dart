@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -72,6 +69,15 @@ class DefaultFirebaseOptions {
     authDomain: 'uniconnect-f2328.firebaseapp.com',
     storageBucket: 'uniconnect-f2328.firebasestorage.app',
     measurementId: 'G-XSX3S0HRTC',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDB-4gtT6V9SOS8mtk2XhVx3lDB3XvKqtg',
+    appId: '1:32125673340:ios:e6c6320dd3432ab726cef9',
+    messagingSenderId: '32125673340',
+    projectId: 'uniconnect-f2328',
+    storageBucket: 'uniconnect-f2328.firebasestorage.app',
+    iosBundleId: 'com.example.uniconnect',
   );
 
 }
