@@ -18,54 +18,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   String _password = '';
   bool _isLoading = false;
 
-  Future<UserCredential> _signInOrBootstrapAdmin() async {
-    try {
-      return await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _email.trim(),
-        password: _password.trim(),
-      );
-    } on FirebaseAuthException catch (e) {
-      final isMissingOrInvalid = e.code == 'user-not-found' ||
-          e.code == 'invalid-credential' ||
-          e.code == 'wrong-password';
-      if (!isMissingOrInvalid) rethrow;
-
-      final adminQuery = await FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: _email.trim())
-          .where('role', isEqualTo: 'admin')
-          .limit(1)
-          .get();
-
-      if (adminQuery.docs.isEmpty) rethrow;
-
-      final data = adminQuery.docs.first.data();
-      final storedPassword = data['password'];
-      if (storedPassword != null &&
-          storedPassword.toString() != _password.trim()) {
-        throw FirebaseAuthException(
-          code: 'wrong-password',
-          message: 'Wrong password',
-        );
-      }
-
-      try {
-        return await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _email.trim(),
-          password: _password.trim(),
-        );
-      } on FirebaseAuthException catch (createError) {
-        if (createError.code == 'email-already-in-use') {
-          return await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: _email.trim(),
-            password: _password.trim(),
-          );
-        }
-        rethrow;
-      }
-    }
-  }
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
@@ -73,7 +25,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final cred = await _signInOrBootstrapAdmin();
+      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _email.trim(),
+        password: _password.trim(),
+      );
 
       final uid = cred.user!.uid;
 
@@ -89,6 +44,27 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       if (!mounted) return;
 
       Navigator.pushReplacementNamed(context, '/adminHome');
+    } on FirebaseAuthException catch (e) {
+      final message = e.code == 'invalid-credential' ||
+              e.code == 'user-not-found' ||
+              e.code == 'wrong-password'
+          ? 'Admin hesabı Firebase Auth içinde yok. '
+              'Önce Authentication > Users bölümünden bu e-posta ile kullanıcı '
+              'oluşturup tekrar deneyin.'
+          : e.message ?? e.toString();
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Admin login failed'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       showDialog(
         context: context,
