@@ -8,6 +8,7 @@ class EventModel {
   final DateTime date;
   final String time;
   final String location;
+  final String university;
   final String description;
   final String ownerId;
   final bool isApproved;
@@ -19,6 +20,7 @@ class EventModel {
     required this.date,
     required this.time,
     required this.location,
+    required this.university,
     required this.description,
     required this.ownerId,
     required this.isApproved,
@@ -36,6 +38,7 @@ class EventModel {
       date: (data['date'] as Timestamp).toDate(),
       time: data['time'],
       location: data['location'],
+      university: data['university'] ?? '',
       description: data['description'],
       ownerId: data['ownerId'],
       isApproved: data['isApproved'] ?? false,
@@ -50,9 +53,10 @@ class EventModel {
       'date': Timestamp.fromDate(date),
       'time': time,
       'location': location,
+      'university': university,
       'description': description,
       'ownerId': ownerId,
-      'isApproved': false, // ⛔ admin onayı bekler
+      'isApproved': isApproved,
       'createdAt': FieldValue.serverTimestamp(),
     };
   }
@@ -106,13 +110,12 @@ class EventStore {
 
   /// 👑 ADMIN: Onay BEKLEYEN event’ler
   static Stream<List<EventModel>> streamPendingEvents() {
-    return _eventsRef
-        .where('isApproved', isEqualTo: false)
-        .snapshots()
-        .map(
-          (snapshot) =>
-          snapshot.docs.map(EventModel.fromFirestore).toList(),
-    );
+    return _eventsRef.snapshots().map(
+          (snapshot) => snapshot.docs
+              .map(EventModel.fromFirestore)
+              .where((event) => !event.isApproved)
+              .toList(),
+        );
   }
 
   /// 👑 ADMIN: Event onayla
@@ -198,3 +201,5 @@ class EventStore {
     });
   }
 }
+
+
