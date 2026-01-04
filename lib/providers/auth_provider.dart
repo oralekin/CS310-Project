@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -40,13 +41,35 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// SIGN UP
-  Future<void> signUp(String email, String password) async {
+  Future<void> signUp(
+    String email,
+    String password, {
+    required String role,
+    required String fullName,
+    required String university,
+    String? clubName,
+  }) async {
     try {
       _errorMessage = null;
-      await _auth.createUserWithEmailAndPassword(
+      final cred = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      final uid = cred.user?.uid;
+      if (uid != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .set({
+          'email': email,
+          'role': role,
+          'fullName': fullName,
+          'university': university,
+          if (clubName != null && clubName.isNotEmpty)
+            'clubName': clubName,
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
     } on FirebaseAuthException catch (e) {
       _errorMessage = _mapFirebaseError(e);
       notifyListeners();

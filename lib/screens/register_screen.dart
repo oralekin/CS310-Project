@@ -14,12 +14,18 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  static const String _adminAccessCode = 'UNICONNECT_ADMIN_2025';
+
+  String _selectedRole = 'student';
+
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _universityController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
   TextEditingController();
+  final TextEditingController _clubNameController = TextEditingController();
+  final TextEditingController _adminCodeController = TextEditingController();
 
   bool _isSubmitting = false;
 
@@ -30,6 +36,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _clubNameController.dispose();
+    _adminCodeController.dispose();
     super.dispose();
   }
 
@@ -44,6 +52,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await auth.signUp(
         _emailController.text.trim(),
         _passwordController.text.trim(),
+        role: _selectedRole,
+        fullName: _fullNameController.text.trim(),
+        university: _universityController.text.trim(),
+        clubName: _selectedRole == 'admin'
+            ? _clubNameController.text.trim()
+            : null,
       );
 
       errorMessage = auth.errorMessage;
@@ -116,14 +130,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 16),
 
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    // Full Name
-                    TextFormField(
-                      controller: _fullNameController,
-                      decoration: _inputDecoration("Full Name"),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // ROLE
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Account Type",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          ChoiceChip(
+                            label: const Text("Student"),
+                            selected: _selectedRole == 'student',
+                            onSelected: (selected) {
+                              if (!selected) return;
+                              setState(() => _selectedRole = 'student');
+                            },
+                          ),
+                          const SizedBox(width: 10),
+                          ChoiceChip(
+                            label: const Text("Admin"),
+                            selected: _selectedRole == 'admin',
+                            onSelected: (selected) {
+                              if (!selected) return;
+                              setState(() => _selectedRole = 'admin');
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Full Name
+                      TextFormField(
+                        controller: _fullNameController,
+                        decoration: _inputDecoration("Full Name"),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "Please enter your full name";
@@ -133,23 +183,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // University
-                    TextFormField(
-                      controller: _universityController,
-                      decoration: _inputDecoration("University"),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter your university";
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
+                      // University
+                      TextFormField(
+                        controller: _universityController,
+                        decoration: _inputDecoration("University"),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter your university";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
 
-                    // Mail Address
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: _inputDecoration("Mail Address"),
+                      if (_selectedRole == 'admin') ...[
+                        // Club/Organization Name
+                        TextFormField(
+                          controller: _clubNameController,
+                          decoration:
+                          _inputDecoration("Club/Organization Name"),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter your club name";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Mail Address
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: _inputDecoration("Mail Address"),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -196,6 +262,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
+
+                    if (_selectedRole == 'admin') ...[
+                      TextFormField(
+                        controller: _adminCodeController,
+                        obscureText: true,
+                        decoration: _inputDecoration("Admin Access Code"),
+                        validator: (value) {
+                          if (_selectedRole != 'admin') return null;
+                          if (value == null || value.isEmpty) {
+                            return "Please enter the admin access code";
+                          }
+                          if (value.trim() != _adminAccessCode) {
+                            return "Invalid admin access code";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     // Register button
                     SizedBox(
