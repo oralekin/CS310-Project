@@ -41,6 +41,15 @@ If Firebase Auth is blocked on Android with a Recaptcha/App Check error:
 - iOS/Web/macOS/Windows/Linux require additional Firebase configuration via `flutterfire configure`.
 - If a platform is not configured, `firebase_options.dart` will throw an `UnsupportedError`.
 
+## Feedback Fixes
+- Asset image and network image usage added (home screen).
+- Success AlertDialogs added for register/create/reset flows.
+- Responsive layout adjustments using MediaQuery.
+- Logout now calls `AuthProvider.signOut()` from profile screen.
+- Firestore rules added and published to restrict unauthenticated access.
+- Admin approval uses EventStore service (no direct Firestore in UI).
+- Firebase options configured for web and windows; App Check debug token flow documented.
+
 ## Run
 `flutter run`
 
