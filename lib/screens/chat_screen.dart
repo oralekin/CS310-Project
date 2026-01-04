@@ -231,24 +231,48 @@ class _ChatScreenState extends State<ChatScreen> {
                       final m = messages[i];
                       final isMe = m.senderId == user.uid;
 
+                      final senderLabel = [
+                        m.senderName,
+                        m.senderRole.isNotEmpty ? "(${m.senderRole})" : null,
+                      ].whereType<String>().where((s) => s.isNotEmpty).join(" ");
+
                       return Align(
                         alignment: isMe
                             ? Alignment.centerRight
                             : Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isMe
-                                ? const Color(0xFFCFF5C2)
-                                : const Color(0xFFEDEDED),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            m.text,
-                            style: const TextStyle(fontSize: 14),
-                          ),
+                        child: Column(
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            if (senderLabel.isNotEmpty)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(bottom: 2, left: 4),
+                                child: Text(
+                                  senderLabel,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isMe
+                                    ? const Color(0xFFCFF5C2)
+                                    : const Color(0xFFEDEDED),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                m.text,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },

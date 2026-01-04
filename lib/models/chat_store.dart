@@ -30,10 +30,21 @@ class ChatStore {
     required String text,
     required String senderId,
   }) {
-    return _messagesRef(eventId).add({
-      'text': text,
-      'senderId': senderId,
-      'createdAt': FieldValue.serverTimestamp(),
+    return _db
+        .collection('users')
+        .doc(senderId)
+        .get()
+        .then((snapshot) {
+      final data = snapshot.data() ?? {};
+      final senderName = (data['fullName'] ?? '').toString();
+      final senderRole = (data['role'] ?? '').toString();
+      return _messagesRef(eventId).add({
+        'text': text,
+        'senderId': senderId,
+        'senderName': senderName,
+        'senderRole': senderRole,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     });
   }
 }
