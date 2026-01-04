@@ -104,14 +104,16 @@ class EventStore {
   }
 
   static Stream<List<EventModel>> streamMyEvents(String userId) {
-    return _eventsRef
-        .where('ownerId', isEqualTo: userId)
-        .snapshots()
-        .map((snapshot) {
+    return _eventsRef.snapshots().map((snapshot) {
       final events = <EventModel>[];
       for (final doc in snapshot.docs) {
         final event = _tryFromFirestore(doc);
-        if (event != null) {
+        if (event == null) {
+          continue;
+        }
+        if (event.ownerId == userId ||
+            doc.data()['ownerID'] == userId ||
+            doc.data()['userId'] == userId) {
           events.add(event);
         }
       }
