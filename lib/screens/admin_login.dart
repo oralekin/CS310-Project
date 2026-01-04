@@ -18,6 +18,54 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   String _password = '';
   bool _isLoading = false;
 
+  Future<UserCredential> _signInOrBootstrapAdmin() async {
+    try {
+      return await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _email.trim(),
+        password: _password.trim(),
+      );
+    } on FirebaseAuthException catch (e) {
+      final isMissingOrInvalid = e.code == 'user-not-found' ||
+          e.code == 'invalid-credential' ||
+          e.code == 'wrong-password';
+      if (!isMissingOrInvalid) rethrow;
+
+      final adminQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: _email.trim())
+          .where('role', isEqualTo: 'admin')
+          .limit(1)
+          .get();
+
+      if (adminQuery.docs.isEmpty) rethrow;
+
+      final data = adminQuery.docs.first.data();
+      final storedPassword = data['password'];
+      if (storedPassword != null &&
+          storedPassword.toString() != _password.trim()) {
+        throw FirebaseAuthException(
+          code: 'wrong-password',
+          message: 'Wrong password',
+        );
+      }
+
+      try {
+        return await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _email.trim(),
+          password: _password.trim(),
+        );
+      } on FirebaseAuthException catch (createError) {
+        if (createError.code == 'email-already-in-use') {
+          return await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: _email.trim(),
+            password: _password.trim(),
+          );
+        }
+        rethrow;
+      }
+    }
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
@@ -25,10 +73,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _email.trim(),
-        password: _password.trim(),
-      );
+      final cred = await _signInOrBootstrapAdmin();
 
       final uid = cred.user!.uid;
 
