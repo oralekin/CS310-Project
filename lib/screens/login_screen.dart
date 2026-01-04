@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'admin_login.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -40,6 +41,11 @@ class _LoginScreenState extends State<LoginScreen> {
             _passwordController.text.trim(),
           )
           .timeout(const Duration(seconds: 15));
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(
+        context,
+        UserHomeScreen.routeName,
+      );
       // ❗ navigation YOK
       // authStateChanges → main.dart otomatik yönlendirecek
     } catch (e) {
