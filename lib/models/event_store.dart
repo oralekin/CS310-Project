@@ -190,6 +190,12 @@ class EventStore {
         .map((snapshot) => snapshot.docs.length);
   }
 
+  static Future<int> getAttendeeCount(String eventId) async {
+    final snapshot =
+        await _eventsRef.doc(eventId).collection('attendees').get();
+    return snapshot.size;
+  }
+
   static Stream<List<EventModel>> streamJoinedEvents(String userId) {
     return _eventsRef.snapshots().asyncMap((snapshot) async {
       final List<EventModel> joinedEvents = [];

@@ -18,6 +18,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   String? _query;
   List<String> _categories = [];
 
+  Future<List<_PopularEventItem>> _loadPopularEvents(
+    List<EventModel> events,
+  ) async {
+    final items = await Future.wait(events.map((event) async {
+      final count = await EventStore.getAttendeeCount(event.id);
+      return _PopularEventItem(event: event, attendeeCount: count);
+    }));
+
+    items.sort((a, b) => b.attendeeCount.compareTo(a.attendeeCount));
+    return items.take(5).toList();
+  }
+
   Future<void> _openFilters() async {
     final result = await Navigator.pushNamed(
       context,
@@ -96,7 +108,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // POPULAR EVENTS (mock)
+                    // POPULAR EVENTS (most attendees)
                     const Text(
                       "Popular Events",
                       style: TextStyle(
@@ -106,17 +118,60 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    SizedBox(
-                      height: popularListHeight,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (_, __) => _PopularEventCard(
-                          width: popularCardWidth,
-                        ),
-                        separatorBuilder: (_, __) =>
-                        const SizedBox(width: 12),
-                        itemCount: 3,
-                      ),
+                    StreamBuilder<List<EventModel>>(
+                      stream: EventStore.streamApprovedEvents(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 80,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return const Text("Something went wrong.");
+                        }
+                        final events = snapshot.data ?? [];
+                        if (events.isEmpty) {
+                          return const Text("No events yet.");
+                        }
+
+                        return FutureBuilder<List<_PopularEventItem>>(
+                          future: _loadPopularEvents(events),
+                          builder: (context, popularSnapshot) {
+                            if (popularSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const SizedBox(
+                                height: 80,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            final popular = popularSnapshot.data ?? [];
+                            if (popular.isEmpty) {
+                              return const Text("No events yet.");
+                            }
+
+                            return SizedBox(
+                              height: popularListHeight,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (_, index) => _PopularEventCard(
+                                  width: popularCardWidth,
+                                  event: popular[index].event,
+                                  attendeeCount: popular[index].attendeeCount,
+                                ),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(width: 12),
+                                itemCount: popular.length,
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 20),
@@ -229,8 +284,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 // ───────── POPULAR CARD (mock) ─────────
 class _PopularEventCard extends StatelessWidget {
   final double width;
+  final EventModel event;
+  final int attendeeCount;
 
-  const _PopularEventCard({required this.width});
+  const _PopularEventCard({
+    required this.width,
+    required this.event,
+    required this.attendeeCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -254,11 +315,33 @@ class _PopularEventCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text("Event Title"),
+          Text(
+            event.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "$attendeeCount going",
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+class _PopularEventItem {
+  final EventModel event;
+  final int attendeeCount;
+
+  const _PopularEventItem({
+    required this.event,
+    required this.attendeeCount,
+  });
 }
 
 // ───────── EVENT CARD → DETAILS ─────────
