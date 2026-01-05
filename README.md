@@ -84,7 +84,7 @@ Tests included:
 | Name               | Student ID | Role                            |
 | :----------------- | ---------- | ------------------------------- |
 | Mehmet Sefa Ciftci | 32496      | Project Coordinator             |
-| Bahar Kucuk Ozer   | 32148      | Documentation and Submission    |
+| Bahar Kucukozer   | 32148      | Documentation and Submission    |
 | Ekin Oral          | 29421      | Integration and Repository      |
 | Melisa Ece Yildirim| 32053      | Testing and Quality Assurance   |
 | Deniz Colak        | 32342      | Learning and Research           |
