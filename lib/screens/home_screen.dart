@@ -49,8 +49,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final size = MediaQuery.of(context).size;
     final isWide = size.width >= 600;
     final horizontalPadding = isWide ? 24.0 : 16.0;
-    final popularCardWidth = isWide ? 160.0 : 120.0;
-    final popularListHeight = isWide ? 160.0 : 130.0;
+    final popularCardWidth = isWide ? 170.0 : 130.0;
+    final popularListHeight = isWide ? 180.0 : 150.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -159,11 +159,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               height: popularListHeight,
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
-                                itemBuilder: (_, index) => _PopularEventCard(
-                                  width: popularCardWidth,
-                                  event: popular[index].event,
-                                  attendeeCount: popular[index].attendeeCount,
-                                ),
+                        itemBuilder: (_, index) => _PopularEventCard(
+                          width: popularCardWidth,
+                          event: popular[index].event,
+                          attendeeCount: popular[index].attendeeCount,
+                        ),
                                 separatorBuilder: (_, __) =>
                                     const SizedBox(width: 12),
                                 itemCount: popular.length,
@@ -293,38 +293,56 @@ class _PopularEventCard extends StatelessWidget {
     required this.attendeeCount,
   });
 
+  String _imageForCategory(String category) {
+    switch (category.toLowerCase()) {
+      case 'workshop':
+        return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400';
+      case 'seminar':
+        return 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400';
+      case 'culture':
+        return 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400';
+      default:
+        return 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=400';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.black12),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              'images/download.jpg',
-              height: 70,
+            child: Image.network(
+              _imageForCategory(event.category),
+              height: 60,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.image_outlined, size: 60);
+              },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             event.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             "$attendeeCount going",
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: Colors.black54,
             ),
           ),
