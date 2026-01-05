@@ -39,7 +39,7 @@ class MyEventsScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: StreamBuilder<List<EventModel>>(
-          stream: EventStore.streamMyEvents(user.uid),
+          stream: EventStore.streamJoinedEvents(user.uid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -64,7 +64,7 @@ class MyEventsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "You have no events yet",
+                      "You haven't joined any events yet",
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
