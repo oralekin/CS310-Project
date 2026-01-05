@@ -1,85 +1,95 @@
-UniConnect
-Overview
+# 🎓 UniConnect
 
-UniConnect is a Flutter-based mobile application that centralizes university club events into a single platform. It enables students to discover, follow, and participate in campus events such as workshops, seminars, and festivals through a structured and user-friendly interface.
+> A Flutter-based mobile application that centralizes university club events into a single, structured platform.
 
-The application uses Firebase for backend services and Provider for state management, ensuring scalability, maintainability, and real-world applicability.
+---
 
-Features
+## 📌 Overview
+**UniConnect** is a mobile application developed to bring together university club events such as workshops, seminars, and festivals under one platform.  
+It eliminates fragmented communication channels and enables students to easily discover, follow, and participate in campus events.
 
-Email and password authentication (sign up, sign in, password reset)
+The application leverages **Firebase** for backend services and **Provider** for state management, ensuring a scalable and maintainable architecture.
 
-Event creation, approval, and browsing
+---
 
-Join and leave events with attendee count tracking
+## ✨ Features
+- 🔐 Email & password authentication (sign up, sign in, password reset)
+- 📅 Event creation, approval, and browsing
+- ➕ Join / leave events with attendee count tracking
+- 👤 User profile management with profile photo update flow
+- 🛂 Basic admin approval workflow
+- 💬 In-app chat functionality
+- 📱 Fully responsive UI with named-route navigation
 
-User profile management with profile photo update flow
+---
 
-Basic admin approval workflow
+## 🛠 Tech Stack
+- **Flutter (Dart)**
+- **Firebase**
+  - Authentication  
+  - Cloud Firestore
+- **Provider** (State Management)
 
-In-app chat functionality
+---
 
-Responsive UI with named-route navigation
+## ⚙️ Setup & Installation
 
-Tech Stack
+### Prerequisites
+- Flutter **3.3+**
+- Dart **3.3+**
 
-Flutter (Dart)
-
-Firebase Authentication
-
-Cloud Firestore
-
-Provider (state management)
-
-Setup
-
-Install Flutter 3.3+ and Dart 3.3+
-
-Install dependencies:
+### Installation
+```bash
 flutter pub get
+```
+Firebase Configuration
 
-Configure Firebase:
+Run:
 
-Run flutterfire configure to generate firebase_options.dart
+flutterfire configure
 
-Android: place google-services.json in android/app
 
-iOS: place GoogleService-Info.plist in ios/Runner
+to generate firebase_options.dart
+
+Add platform configuration files:
+
+Android: android/app/google-services.json
+
+iOS: ios/Runner/GoogleService-Info.plist
 
 Enable Authentication and Cloud Firestore in Firebase Console
 
-Publish Firestore rules defined in firestore.rules
+Publish Firestore rules from firestore.rules
 
-Firebase App Check (Development)
+🔐 Firebase App Check (Development)
 
-If Firebase Authentication is blocked on Android due to App Check or reCAPTCHA restrictions:
+If Firebase Authentication is blocked on Android due to App Check or reCAPTCHA:
 
-Obtain the debug token from runtime logs
+Retrieve the debug token from runtime logs
 
-Add the token under Firebase Console → App Check → Debug tokens
+Add the token in
+Firebase Console → App Check → Debug tokens
 
 Restart the application
 
-Run
-
+▶️ Run the Application
 flutter run
 
-Testing
+🧪 Testing
 
-Run all tests using:
+Run all tests with:
+
 flutter test
 
 Included Tests
 
-Application launch smoke test (widget_test.dart)
+Widget Smoke Test
+Verifies that the application launches and the root MaterialApp builds correctly.
 
-ExpandableText widget behavior test (expandable_text_test.dart)
+ExpandableText Widget Test
+Ensures correct expand / collapse behavior based on text length.
 
-Known Limitations
-
-Joined-events stream performs per-event lookups and may not scale well for large datasets
-
-Event lists currently do not support pagination
+All tests pass successfully.
 
 | Name                | Student ID | Role                        |
 | ------------------- | ---------- | --------------------------- |
