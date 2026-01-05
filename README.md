@@ -1,90 +1,82 @@
 # UniConnect
 
 ## Overview
-UniConnect is a multi-university club event platform for students to discover, share, and join campus events (workshops, seminars, festivals) in one place.
+UniConnect is a Flutter-based mobile application that centralizes university club events into a single platform. It enables students to discover, follow, and participate in campus events such as workshops, seminars, and festivals through a structured and user-friendly interface.
 
-## Key Features
-- User authentication (sign up, sign in, password reset)
+The application is built using Firebase for backend services and Provider for state management, ensuring scalability, maintainability, and real-world applicability.
+
+---
+
+## Features
+- Email and password authentication (sign up, sign in, password reset)
 - Event creation, approval, and browsing
-- Event participation (join/leave) with attendee counts
-- Profile management with photo update flow
-- Basic admin dashboard and approval flow
-- In-app chat
+- Join and leave events with attendee count tracking
+- User profile management with profile photo update flow
+- Basic admin approval workflow
+- In-app chat functionality
+- Responsive UI with named-route navigation
+
+---
 
 ## Tech Stack
-- Flutter (Dart)
-- Firebase: Authentication + Cloud Firestore
-- Provider for state management
+- **Flutter (Dart)**
+- **Firebase**
+  - Authentication
+  - Cloud Firestore
+- **Provider** for state management
+
+---
 
 ## Setup
-1. Install Flutter 3.3+ (Dart 3.3+). Verify with `flutter --version`.
-2. Install dependencies: `flutter pub get`
-3. Configure Firebase for your platforms:
-   - Run `flutterfire configure` to regenerate `lib/firebase_options.dart`, or replace it with your own config.
-   - Android: place `google-services.json` in `android/app`
-   - iOS: place `GoogleService-Info.plist` in `ios/Runner`
-4. Ensure Firestore and Auth are enabled in the Firebase console.
-5. If authentication is blocked on Android, verify:
-   - The Firebase Android app uses the same package name as `android/app/build.gradle.kts`.
-   - Your debug SHA-1 fingerprint is registered in Firebase Console.
-   - App Check / reCAPTCHA settings allow development builds.
-6. Firestore rules are defined in `firestore.rules`.
+1. Install Flutter **3.3+** and Dart **3.3+**
+2. Install dependencies:
+   ```bash
+   flutter pub get
+Configure Firebase:
 
-## App Check (Debug Token)
-If Firebase Auth is blocked on Android with a Recaptcha/App Check error:
-1. Run the app and look for a log line like:
-   `Enter this debug secret into the allow list in the Firebase Console for your project: <TOKEN>`
-2. Firebase Console → App Check → Debug tokens → Add debug token and paste the value.
-3. Restart the app.
+Run flutterfire configure to generate firebase_options.dart
 
-## Platform Notes
-- iOS/Web/macOS/Windows/Linux require additional Firebase configuration via `flutterfire configure`.
-- If a platform is not configured, `firebase_options.dart` will throw an `UnsupportedError`.
+Android: place google-services.json in android/app
 
-## Feedback Fixes
-- Asset image and network image usage added (home screen).
-- Success AlertDialogs added for register/create/reset flows.
-- Responsive layout adjustments using MediaQuery.
-- Logout now calls `AuthProvider.signOut()` from profile screen.
-- Firestore rules added and published to restrict unauthenticated access.
-- Admin approval uses EventStore service (no direct Firestore in UI).
-- Firebase options configured for web and windows; App Check debug token flow documented.
-- iOS project added with `GoogleService-Info.plist`.
-- Removed machine-specific Gradle Java home path.
+iOS: place GoogleService-Info.plist in ios/Runner
 
-## Feedback Status
-Completed:
-- iOS/Web/Windows Firebase configuration added.
-- Windows-specific Gradle path removed.
-- Image.asset + Image.network usage added.
-- Success AlertDialogs added.
-- Basic responsiveness via MediaQuery added.
-- Logout bug fixed.
-- Firestore security rules included.
+Enable Authentication and Cloud Firestore in Firebase Console
 
-Remaining:
-- Verify App Check/Auth access is unblocked on all test devices.
-- Record final demo video and submit final report.
+Publish Firestore rules defined in firestore.rules
 
-## Run
-`flutter run`
+Firebase App Check (Development)
+If Firebase Authentication is blocked on Android due to App Check or reCAPTCHA restrictions:
 
-## Tests
-Run all tests with: `flutter test`
+Obtain the debug token from runtime logs
 
-Tests included:
-- `test/widget_test.dart`: App launches smoke test (MaterialApp builds).
-- `test/expandable_text_test.dart`: ExpandableText hides toggle for short text and toggles for long text.
+Add the token under Firebase Console → App Check → Debug tokens
 
-## Known Limitations
-- Joined-events stream performs per-event lookups and may be slow for large datasets.
-- No pagination for event lists yet.
+Restart the application
 
-## Team
-| Name               | Student ID | Role                            |
-| :----------------- | ---------- | ------------------------------- |
-| Mehmet Sefa Ciftci | 32496      | Project Coordinator             |
-| Bahar Kucukozer   | 32148      | Documentation and Submission    |
-| Ekin Oral          | 29421      | Integration and Repository      |
-| Melisa Ece Yildirim| 32053      | Testing and Quality Assurance   |
-| Deniz Colak        | 32342      | Learning and Research           |
+```bash
+flutter run
+```
+Testing
+Run all tests using:
+
+
+flutter test
+Included Tests
+Application launch smoke test (widget_test.dart)
+
+ExpandableText widget behavior test (expandable_text_test.dart)
+
+All tests pass successfully.
+
+Known Limitations
+Joined-events stream performs per-event lookups and may not scale well for large datasets
+
+Event lists currently do not support pagination
+
+Team
+Name	Student ID	Role
+Mehmet Sefa Ciftci	32496	Project Coordinator
+Bahar Küçüközer	32148	Documentation & Submission
+Ekin Oral	29421	Integration & Repository
+Melisa Ece Yıldırım	32053	Testing & Quality Assurance
+Deniz Çolak	32342	Learning & Research
